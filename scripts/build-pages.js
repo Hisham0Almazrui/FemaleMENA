@@ -5,7 +5,7 @@ fs.mkdirSync("js", { recursive: true });
 fs.writeFileSync("js/data.js", "window.MH_TEAMS=" + teams + ";\nwindow.MH_PLAYERS=" + players + ";\n");
 
 const pages = [
-  ["index", "MENA Hub", "home"],
+  ["index", "Female MENA", "home"],
   ["leaderboards", "التصنيفات", "leaderboards"],
   ["players", "تصنيف اللاعبين", "players"],
   ["rules", "نظام نقاط التصنيف", "rules"],
@@ -32,11 +32,11 @@ const html = (title, page) => `<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/site.css?v=11"/>
+<link rel="stylesheet" href="css/site.css?v=15"/>
 </head>
 <body data-page="${page}">
-<script src="js/data.js?v=11"></script>
-<script src="js/app.js?v=11"></script>
+<script src="js/data.js?v=15"></script>
+<script src="js/app.js?v=15"></script>
 </body>
 </html>
 `;

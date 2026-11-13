@@ -49,7 +49,7 @@
       rosterTitle: "نقاط الفريق هي مجموع نقاط لاعبيه الحاليين",
       noRoster: "لا توجد تشكيلة منشورة لهذا الفريق.",
       footerSlogan: "اللعب يجمعنا. المنافسة تطورنا.",
-      rights: "جميع الحقوق محفوظة © 2026 MENA Hub",
+      rights: "جميع الحقوق محفوظة © 2026 Female MENA",
       start: "كيف تبدأ",
       terms: "الشروط",
       privacy: "الخصوصية",
@@ -130,7 +130,7 @@
       rosterTitle: "A team's points are the sum of its current players",
       noRoster: "No published roster for this team.",
       footerSlogan: "Play brings us together. Competition moves us forward.",
-      rights: "All rights reserved © 2026 MENA Hub",
+      rights: "All rights reserved © 2026 Female MENA",
       start: "Get started",
       terms: "Terms",
       privacy: "Privacy",
@@ -225,18 +225,7 @@
   const rate = (s) => String(s || "—").replace(/\s+/g, "");
   const mark = (m) => (m === "W" ? `<b class="w">${lang === "en" ? "W" : "ف"}</b>` : `<b class="l">${lang === "en" ? "L" : "خ"}</b>`);
 
-  const logo = `<svg viewBox="0 0 360 104" fill="currentColor" aria-hidden="true">
-    <g transform="translate(0 -12) scale(2)">
-      <path d="M28.5 24L24.8 26.4Q24.2 26.8 24.2 27.5V32L15.3 35.7Q14.6 36 14.6 36.8V42L8.5 43.1Q7.8 43.2 7.3 43.8L2.2 51Q1.6 52 2.8 52H18.2Q18.7 52 19.1 51.6L20.9 49.3Q21.3 48.9 21.3 48.3V39.7L28.3 35.8Q29 35.4 29 34.7V24.3Q29 23.7 28.5 24Z M35.5 24L39.2 26.4Q39.8 26.8 39.8 27.5V32L48.7 35.7Q49.4 36 49.4 36.8V42L55.5 43.1Q56.2 43.2 56.7 43.8L61.8 51Q62.4 52 61.2 52H45.8Q45.3 52 44.9 51.6L43.1 49.3Q42.7 48.9 42.7 48.3V39.7L35.7 35.8Q35 35.4 35 34.7V24.3Q35 23.7 35.5 24Z"></path>
-      <path class="gold" d="M26.7 13H24.9Q24.1 13 24.3 13.8Q25 17.4 29.5 18.6L30.1 17.7Q26.1 16.7 25.4 14.1H26.9Z M37.3 13H39.1Q39.9 13 39.7 13.8Q39 17.4 34.5 18.6L33.9 17.7Q37.9 16.7 38.6 14.1H37.1Z M26.5 12Q32 11.7 37.5 12Q37.5 16.9 34.6 18.7Q33.5 19.5 32.8 19.6V20.5Q33 21.2 33.3 21.7H34.2Q35.2 21.7 35.2 22.5H35.6Q36.1 22.5 36.1 23.1V23.6H27.9V23.1Q27.9 22.5 28.4 22.5H28.8Q28.8 21.7 29.8 21.7H30.7Q31 21.2 31.2 20.5V19.6Q30.5 19.5 29.4 18.7Q26.5 16.9 26.5 12Z"></path>
-    </g>
-    <g transform="translate(145 8)">
-      <path fill-rule="evenodd" d="M0 42V0h10l13 20L36 0h10v42H34V21L23 37 12 21v21Z M55 0h38v10H67v6h21v10H67v6h26v10H55Z M102 42V0h11l23 24V0h12v42h-11l-23-24v24Z M155 42l18-42h14l18 42h-13l-3-8h-20l-3 8Z M173 24h12l-6-15Z"></path>
-      <path fill-rule="evenodd" d="M0 0h8v12h15V0h8v32h-8V20H8v12H0Z M40 0h8v24h15V0h8v27l-5 5H45l-5-5Z M80 0h24l6 6v7l-4 3 4 3v7l-6 6H80Z M88 7v6h14V7Z M88 20v5h14v-5Z" transform="translate(95 55)"></path>
-      <path class="gold" d="M0 42V0h10l13 20L36 0h10v42H34V21L23 37 12 21v21Z"></path>
-      <path class="gold" d="M0 0h8v12h15V0h8v32h-8V20H8v12H0Z" transform="translate(95 55)"></path>
-    </g>
-  </svg>`;
+  const logo = `<img src="media/logo-female.png" alt="Female MENA" />`;
 
   const nav = [
     ["index.html", "home", "home"],
@@ -263,18 +252,11 @@
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
     document.body.innerHTML = `
-      <div class="arcs" ${motion ? "" : "hidden"} aria-hidden="true">
-        <svg viewBox="0 0 800 500" fill="none">
-          <path d="M40 420C180 80 420 40 760 210" stroke="#d7ba89" stroke-width="1.4" opacity=".55"/>
-          <path d="M20 460C220 160 480 120 790 300" stroke="#d7ba89" stroke-width="1" opacity=".28"/>
-          <circle cx="250" cy="250" r="5" fill="#d7ba89"/>
-          <path d="M230 230l28 8" stroke="#d7ba89" stroke-width="1.2"/>
-        </svg>
-      </div>
+      <div class="arcs" hidden aria-hidden="true"></div>
       <div class="shell">
         <header class="mast">
           <div class="mast-inner">
-            <a class="brand" href="index.html" aria-label="MENA Hub">${logo}</a>
+            <a class="brand" href="index.html" aria-label="Female MENA">${logo}</a>
             <nav class="topnav" aria-label="${esc(t("menu"))}">
               ${nav
                 .filter(([href, id]) => id !== "community")
@@ -304,7 +286,7 @@
     return `<footer class="site-footer"><div class="wrap">
       <div class="foot-grid">
         <div>
-          <a class="brand" href="index.html" aria-label="MENA Hub">${logo}</a>
+          <a class="brand" href="index.html" aria-label="Female MENA">${logo}</a>
           <p>${esc(t("footerSlogan"))}</p>
           <div class="foot-links">
             <a href="start.html">${esc(t("start"))}</a>
@@ -491,11 +473,6 @@
           <button class="btn primary" type="button" data-act="signup">${esc(t("createAccount"))}</button>
           <a class="btn" href="tournaments.html">${esc(t("createCup"))}</a>
         </div>
-        <svg class="arc-art" viewBox="0 0 280 180" fill="none" aria-hidden="true">
-          <path d="M10 150C70 20 170 10 270 90" stroke="#d7ba89" stroke-width="1.4"/>
-          <circle cx="150" cy="78" r="5" fill="#d7ba89"/>
-          <path d="M132 62l22 10M154 68l16-16" stroke="#d7ba89"/>
-        </svg>
       </div>
       <div class="panel">
         <p class="kicker">${esc(t("leaderboards"))} <span class="tag">${esc(t("teamsTab"))}</span></p>
@@ -924,8 +901,8 @@
           <h3>${esc(cupLabel("about"))}</h3>
           <p class="muted">${
             lang === "en"
-              ? "An official 4v4 Modern Warfare daily cup. Placement points are added to the MENA Hub ranking when the event ends."
-              : "بطولة يومية رسمية بأسلوب 4 ضد 4 على Modern Warfare. تُضاف نقاط المركز إلى تصنيف MENA Hub بعد انتهاء البطولة."
+              ? "An official 4v4 Modern Warfare daily cup. Placement points are added to the Female MENA ranking when the event ends."
+              : "بطولة يومية رسمية بأسلوب 4 ضد 4 على Modern Warfare. تُضاف نقاط المركز إلى تصنيف Female MENA بعد انتهاء البطولة."
           }</p>
         </article>
         <p class="cup-closed"><i></i> ${esc(cupLabel("closed"))} <b>${esc(cup.range)}</b></p>
@@ -1188,7 +1165,7 @@
       return simple(t("leagues"), `<p class="muted">${esc(t("emptyLeagues"))}</p>`);
     if (page === "teams") return teamsPage();
     if (page === "partners")
-      return simple(t("partners"), `<p class="muted">${lang === "en" ? "Partner placements for the MENA Hub season appear in this space." : "مساحات شركاء موسم MENA Hub تظهر في هذه الصفحة."}</p>`);
+      return simple(t("partners"), `<p class="muted">${lang === "en" ? "Partner placements for the Female MENA season appear in this space." : "مساحات شركاء موسم Female MENA تظهر في هذه الصفحة."}</p>`);
     if (page === "support")
       return `<header class="page-head"><h1>${esc(t("support"))}</h1></header>
         <form class="card stack" data-support="1">
