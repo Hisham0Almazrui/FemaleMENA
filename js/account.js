@@ -902,7 +902,8 @@
   }
 
   async function act(path, method, body) {
-    await api(path, { method, body });
+    const result = await api(path, { method, body });
+    if (result.ok && window.MHWhen && path.indexOf("/api/tournaments") === 0) window.MHWhen.announce();
     draw();
   }
 

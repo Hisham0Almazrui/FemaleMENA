@@ -67,6 +67,103 @@
     return { ok: status < 400, status, ...body };
   }
 
+  function cupStore() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("mh-cup-store") || "{}");
+      return {
+        deleted: Array.isArray(saved.deleted) ? saved.deleted.map(String) : [],
+        rows: saved.rows && typeof saved.rows === "object" ? saved.rows : {},
+      };
+    } catch {
+      return { deleted: [], rows: {} };
+    }
+  }
+
+  function remember(store) {
+    try {
+    const compact = {
+      deleted: store.deleted,
+      rows: Object.fromEntries(
+        Object.entries(store.rows).map(([id, row]) => {
+          const copy = { ...row };
+          if (String(copy.details || "").length > 400000) copy.details = "{}";
+          return [id, copy];
+        })
+      ),
+    };
+    localStorage.setItem("mh-cup-store", JSON.stringify(compact));
+    return true;
+  } catch {
+    return false;
+  }
+  }
+
+  function merged(data) {
+    const store = cupStore();
+    const byId = new Map();
+    (data.tournaments || []).forEach((row) => byId.set(String(row.id), row));
+    Object.entries(store.rows).forEach(([id, row]) => byId.set(String(id), row));
+    store.deleted.forEach((id) => byId.delete(String(id)));
+    return [...byId.values()];
+  }
+
+  function publicRows(rows) {
+    return rows.filter((row) => {
+      if (row.status === "rejected") return false;
+      let details = {};
+      try {
+        details = JSON.parse(row.details || "{}");
+      } catch {
+        details = {};
+      }
+      return details.visibility !== "private";
+    });
+  }
+
+  function rowFrom(body, previous, id) {
+    const prev = previous || {};
+    let details = {};
+    try {
+      details = JSON.parse(prev.details || "{}");
+    } catch {
+      details = {};
+    }
+    const copy = { ...details, ...(body.details || {}) };
+    delete copy.logoData;
+    delete copy.logoUrl;
+    delete copy.logoName;
+    ["card", "banner"].forEach((key) => {
+      const data = copy[key + "Data"];
+      if (typeof data === "string" && data.startsWith("data:image/")) copy[key + "Url"] = data;
+      delete copy[key + "Data"];
+    });
+    const allowed = new Set(["draft", "pending", "open", "live", "ended"]);
+    const stage = Array.isArray(copy.stages) ? copy.stages[0] || null : prev.stage || null;
+    return {
+      id,
+      game: body.game === "valorant" ? "valorant" : body.game === "cod" ? "cod" : prev.game || "cod",
+      name: body.name ? String(body.name).trim().slice(0, 80) : prev.name || "",
+      status: allowed.has(body.status) ? body.status : prev.status || "draft",
+      summary: body.summary != null ? String(body.summary).slice(0, 240) : prev.summary || "",
+      start_at: body.startAt != null ? body.startAt : prev.start_at || "",
+      end_at: body.endAt != null ? body.endAt : prev.end_at || "",
+      seats: prev.seats || 0,
+      cap: Number(body.cap) || prev.cap || 16,
+      rules: String(copy.rules || prev.rules || ""),
+      info: String(copy.info || prev.info || ""),
+      prize: copy.prize || prev.prize || "",
+      currency: copy.currency || prev.currency || "",
+      stage,
+      image: copy.cardUrl || copy.bannerUrl || prev.image || "",
+      banner: copy.bannerUrl || copy.cardUrl || prev.banner || "",
+      details: JSON.stringify(copy),
+    };
+  }
+
+  function changed() {
+    if (window.MHWhen) window.MHWhen.announce();
+  }
+
   async function staticCall(path, options) {
     const method = (options.method || "GET").toUpperCase();
     const data = await ready();
@@ -97,14 +194,57 @@
       if (!account) return result(401, { error: "unauthorized" });
       return result(200, { user: publicUser(account) });
     }
-    if (method === "GET" && (path === "/api/public/tournaments" || path === "/api/tournaments")) {
-      return result(200, { tournaments: data.tournaments });
+    if (method === "GET" && path === "/api/public/tournaments") {
+      return result(200, { tournaments: publicRows(merged(data)) });
+    }
+    if (method === "GET" && path === "/api/tournaments") {
+      return result(200, { tournaments: merged(data) });
+    }
+    if (method === "POST" && path === "/api/tournaments") {
+      const account = await accountFromToken();
+      if (!account || account.role === "visitor") return result(403, { error: "forbidden" });
+      const id = Date.now();
+      const store = cupStore();
+      store.rows[String(id)] = rowFrom(body, null, id);
+      if (!remember(store)) return result(500, { error: "offline" });
+      changed();
+      return result(201, { id, status: store.rows[String(id)].status });
+    }
+    const cupPath = path.match(/^\/api\/tournaments\/(\d+)(\/decision)?$/);
+    if (cupPath && (method === "PATCH" || method === "DELETE" || method === "POST")) {
+      const account = await accountFromToken();
+      if (!account || account.role === "visitor") return result(403, { error: "forbidden" });
+      const id = cupPath[1];
+      const store = cupStore();
+      const current = merged(data).find((row) => String(row.id) === id);
+      if (method === "DELETE") {
+        if (!store.deleted.includes(id)) store.deleted.push(id);
+        delete store.rows[id];
+        if (!remember(store)) return result(500, { error: "offline" });
+        changed();
+        return result(200, { ok: true, id: Number(id) });
+      }
+      if (!current && !store.rows[id]) return result(404, { error: "not-found" });
+      if (cupPath[2] === "/decision") {
+        if (account.role !== "owner") return result(403, { error: "forbidden" });
+        const status = body.decision === "approve" ? "open" : "rejected";
+        store.rows[id] = { ...(current || store.rows[id]), status };
+        if (!remember(store)) return result(500, { error: "offline" });
+        changed();
+        return result(200, { ok: true, id: Number(id), status });
+      }
+      store.deleted = store.deleted.filter((item) => item !== id);
+      store.rows[id] = rowFrom(body, current || store.rows[id], Number(id));
+      if (!remember(store)) return result(500, { error: "offline" });
+      changed();
+      return result(200, { ok: true, id: Number(id), status: store.rows[id].status });
     }
     if (method === "GET" && path === "/api/stats") {
+      const cups = merged(data);
       return result(200, {
-        tournaments: data.tournaments.length,
+        tournaments: cups.length,
         matches: 0,
-        pending: data.tournaments.filter((cup) => cup.status === "draft" || cup.status === "pending").length,
+        pending: cups.filter((cup) => cup.status === "draft" || cup.status === "pending").length,
       });
     }
     if (method === "GET" && path === "/api/users") {
