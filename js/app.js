@@ -17,10 +17,6 @@
       matches: "المباريات المباشرة",
       leagues: "الدوريات",
       leaderboards: "التصنيفات",
-      teams: "الفرق",
-      community: "بطولات المجتمع",
-      roster: "أكمل تشكيلتك",
-      partners: "الشركاء",
       support: "الدعم",
       teamsTab: "الفرق",
       playersTab: "اللاعبون",
@@ -49,7 +45,21 @@
       rosterTitle: "نقاط الفريق هي مجموع نقاط لاعبيه الحاليين",
       noRoster: "لا توجد تشكيلة منشورة لهذا الفريق.",
       footerSlogan: "اللعب يجمعنا. المنافسة تطورنا.",
-      rights: "جميع الحقوق محفوظة © 2026 Female MENA",
+      rights: "FEMALE MENA 2026 ©",
+      footAbout: "فيميل مينا مجتمع للألعاب وبطولات الرياضات الإلكترونية.",
+      footRegion: "الشرق الأوسط وشمال أفريقيا",
+      footInfo: "المعلومات",
+      footTours: "البطولات",
+      inquiries: "للاستفسارات",
+      help: "الدعم والمساعدة",
+      faq: "الأسئلة الشائعة",
+      privacyPolicy: "سياسة الخصوصية",
+      footTerms: "الشروط والأحكام",
+      talk: "تواصل معنا",
+      allCups: "جميع البطولات",
+      upcoming: "البطولات القادمة",
+      finishedCups: "البطولات المنتهية",
+      cod: "كود · Call of Duty",
       start: "كيف تبدأ",
       terms: "الشروط",
       privacy: "الخصوصية",
@@ -65,10 +75,6 @@
       createAccount: "أنشئ حسابك",
       createCup: "أنشئ بطولتك الخاصة",
       fullBoard: "عرض التصنيف الكامل",
-      recruitTitle: "أكمل تشكيلتك",
-      recruitText: "لاعب يبحث عن فريق، وفريق يبحث عن لاعب. التواصل كله من داخل الموقع.",
-      lookingTeams: "فرق تبحث عن لاعبين",
-      lookingPlayers: "لاعبون يبحثون عن فريق",
       ended: "انتهت",
       emptyLeagues: "المواسم القادمة تظهر هنا عند إعلانها.",
       cookieTitle: "خصوصيتك، واختيارك.",
@@ -98,10 +104,6 @@
       matches: "Live matches",
       leagues: "Leagues",
       leaderboards: "Leaderboards",
-      teams: "Teams",
-      community: "Community cups",
-      roster: "Complete your roster",
-      partners: "Partners",
       support: "Support",
       teamsTab: "Teams",
       playersTab: "Players",
@@ -130,7 +132,21 @@
       rosterTitle: "A team's points are the sum of its current players",
       noRoster: "No published roster for this team.",
       footerSlogan: "Play brings us together. Competition moves us forward.",
-      rights: "All rights reserved © 2026 Female MENA",
+      rights: "© 2026 FEMALE MENA",
+      footAbout: "Female MENA is a community for games and esports tournaments.",
+      footRegion: "Middle East and North Africa",
+      footInfo: "Information",
+      footTours: "Tournaments",
+      inquiries: "Inquiries",
+      help: "Help and support",
+      faq: "FAQ",
+      privacyPolicy: "Privacy policy",
+      footTerms: "Terms and conditions",
+      talk: "Contact us",
+      allCups: "All tournaments",
+      upcoming: "Upcoming tournaments",
+      finishedCups: "Finished tournaments",
+      cod: "Call of Duty",
       start: "Get started",
       terms: "Terms",
       privacy: "Privacy",
@@ -146,10 +162,6 @@
       createAccount: "Create your account",
       createCup: "Create your tournament",
       fullBoard: "View the full ranking",
-      recruitTitle: "Complete your roster",
-      recruitText: "A player looking for a team, and a team looking for a player.",
-      lookingTeams: "Teams looking for players",
-      lookingPlayers: "Players looking for a team",
       ended: "Ended",
       emptyLeagues: "Upcoming seasons will appear here when they are announced.",
       cookieTitle: "Your privacy, your choice.",
@@ -192,11 +204,16 @@
   let authMode = null;
   let menuOpen = false;
   let motion = localStorage.getItem("mh-motion") !== "off";
-  let user = localStorage.getItem("mh-user") || "";
+  let user = localStorage.getItem("mh-token") ? localStorage.getItem("mh-user") || "" : "";
+  let role = localStorage.getItem("mh-token") ? localStorage.getItem("mh-role") || "" : "";
+  let authError = false;
+  let authMessage = "";
   let cookie = localStorage.getItem("mh-cookie") || "";
   let cupQuery = "";
   let cupFilter = "all";
+  let gameFilter = "all";
   let cupOrder = "new";
+  let liveCups = [];
   let cupTab = "overview";
   let bracketSide = "all";
   let bracketQuery = "";
@@ -233,16 +250,17 @@
     ["matches.html", "matches", "matches"],
     ["leagues.html", "leagues", "leagues"],
     ["leaderboards.html", "leaderboards", "leaderboards"],
-    ["teams.html", "teams", "teams"],
-    ["tournaments.html#community", "community", "community"],
-    ["roster.html", "roster", "roster"],
-    ["partners.html", "partners", "partners"],
     ["support.html", "support", "support"],
   ];
 
+  function roleBadge(kind) {
+    const label = { owner: lang === "en" ? "Owner" : "المالك", admin: lang === "en" ? "Admin" : "مشرف", visitor: lang === "en" ? "Visitor" : "زائر" }[kind];
+    return label ? `<span class="role-badge ${kind}">${label}</span>` : "";
+  }
+
   function accountButtons() {
-    if (user) {
-      return `<span class="user-chip">${esc(t("welcome"))} ${esc(user)}</span><button class="btn" data-act="logout" type="button">${esc(t("logout"))}</button>`;
+    if (user && localStorage.getItem("mh-token")) {
+      return `<a class="account-link" href="account.html">${roleBadge(role)}<span>${esc(user)}</span></a><button class="btn" data-act="logout" type="button">${esc(t("logout"))}</button>`;
     }
     return `<button class="btn" data-act="login" type="button">${esc(t("login"))}</button>
       <button class="btn primary" data-act="signup" type="button">${esc(t("signup"))}</button>`;
@@ -259,8 +277,7 @@
             <a class="brand" href="index.html" aria-label="Female MENA">${logo}</a>
             <nav class="topnav" aria-label="${esc(t("menu"))}">
               ${nav
-                .filter(([href, id]) => id !== "community")
-                .map(([href, id, key]) => `<a class="${page === id ? "on" : ""}" href="${href}">${esc(id === "roster" ? (lang === "en" ? "Community" : "المجتمع") : t(key))}</a>`)
+                .map(([href, id, key]) => `<a class="${page === id ? "on" : ""}" href="${href}">${esc(t(key))}</a>`)
                 .join("")}
             </nav>
             <div class="actions">
@@ -283,31 +300,48 @@
   }
 
   function footer() {
+    const col = (title, en, links) => `<div class="foot-col">
+      <h3>${esc(title)}</h3>
+      <p>${esc(en)}</p>
+      ${links.map(([label, href]) => `<a href="${href}">${esc(label)}</a>`).join("")}
+    </div>`;
+    const info = [
+      [t("inquiries"), "support.html"],
+      [t("help"), "support.html"],
+      [t("faq"), "rules.html"],
+      [t("privacyPolicy"), "privacy.html"],
+      [t("footTerms"), "terms.html"],
+      [t("talk"), "support.html"],
+    ];
+    const tours = [
+      [t("allCups"), "tournaments.html"],
+      [t("upcoming"), "tournaments.html"],
+      [t("finishedCups"), "tournaments.html"],
+      [t("cod"), "tournaments.html"],
+    ];
     return `<footer class="site-footer"><div class="wrap">
       <div class="foot-grid">
-        <div>
+        <div class="foot-brand">
           <a class="brand" href="index.html" aria-label="Female MENA">${logo}</a>
-          <p>${esc(t("footerSlogan"))}</p>
-          <div class="foot-links">
-            <a href="start.html">${esc(t("start"))}</a>
-            <a href="terms.html">${esc(t("terms"))}</a>
-            <a href="privacy.html">${esc(t("privacy"))}</a>
-            <a href="cookies.html">${esc(t("cookies"))}</a>
-            <a href="support.html">${esc(t("contact"))}</a>
+          <p>${esc(t("footAbout"))}</p>
+          <p class="foot-region">${esc(t("footRegion"))}</p>
+          <div class="socs">
+            <a href="https://www.tiktok.com/@menahub_" target="_blank" rel="noreferrer" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.2 3c.4 2.4 1.7 4.1 3.8 4.6v2.4c-1.3 0-2.5-.4-3.6-1.1v6.4a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v2.5a3.2 3.2 0 1 0 2.2 3.1V3h2.4Z"/></svg></a>
+            <a href="https://x.com/MENAHUB_" target="_blank" rel="noreferrer" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.7 10.4 21 3h-1.8l-5.5 6.3L9.3 3H3.5l6.6 9.4L3.4 21h1.8l5.8-6.7 4.7 6.7h5.8l-6.8-9.6Zm-2 .9-.7-1L6.6 4.6h2.3l4.3 6.1.7 1 5.6 8h-2.3l-4.5-6.4Z"/></svg></a>
+            <a href="https://discord.com" target="_blank" rel="noreferrer" aria-label="Discord"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.2 8.6a7.6 7.6 0 0 1 3.8-1c.2 0 .3.1.4.2l.4 1.1a6.4 6.4 0 0 1 2.4 0l.4-1.1c.1-.1.2-.2.4-.2a7.6 7.6 0 0 1 3.8 1c.1 0 .2.1.2.2 1.2 1.8 1.9 4 2.1 6.1 0 .1 0 .2-.1.3a10 10 0 0 1-3.1 1.6c-.1 0-.2 0-.3-.1l-.5-.7c.2-.1.4-.2.6-.3 0 0 .1-.1 0-.1-1.2.5-2.5.8-3.8.8s-2.6-.3-3.8-.8c-.1 0-.1.1 0 .1.2.1.4.2.6.3l-.5.7c-.1.1-.2.1-.3.1a10 10 0 0 1-3.1-1.6c-.1-.1-.1-.2-.1-.3.2-2.1.9-4.3 2.1-6.1.1-.1.1-.2.2-.2ZM10 14.2c.6 0 1.1-.6 1.1-1.3s-.5-1.3-1.1-1.3-1.1.6-1.1 1.3.5 1.3 1.1 1.3Zm4 0c.6 0 1.1-.6 1.1-1.3s-.5-1.3-1.1-1.3-1.1.6-1.1 1.3.5 1.3 1.1 1.3Z"/></svg></a>
           </div>
         </div>
-        <div>
-          <div class="socials">
-            <span>${esc(t("follow"))}</span>
-            <a href="https://x.com/MENAHUB_" target="_blank" rel="noreferrer">X</a>
-            <a href="https://www.tiktok.com/@menahub_" target="_blank" rel="noreferrer">TikTok</a>
-            <a href="https://www.twitch.tv/menahub_" target="_blank" rel="noreferrer">Twitch</a>
-            <a href="https://discord.com" target="_blank" rel="noreferrer">Discord</a>
-          </div>
-          <p><button class="motion" type="button" data-act="motion">${esc(t("motion"))}: ${esc(t(motion ? "on" : "off"))}</button></p>
-        </div>
+        ${col(t("footInfo"), "INFORMATION", info)}
+        ${col(t("footTours"), "TOURNAMENTS", tours)}
       </div>
-      <div class="copy">${esc(t("rights"))}</div>
+      <div class="foot-bar">
+        <p class="copy">${esc(t("rights"))}</p>
+        <div class="foot-legal">
+          <a href="privacy.html">${esc(t("privacy"))}</a>
+          <a href="terms.html">${esc(t("footTerms"))}</a>
+        </div>
+        <a class="foot-mail" href="support.html">${esc(t("talk"))}<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></a>
+      </div>
     </div></footer>`;
   }
 
@@ -322,7 +356,7 @@
           ${nav
             .map(
               ([href, id, key]) =>
-                `<a class="${page === id ? "on" : ""} ${id === "roster" ? "new" : ""}" href="${href}">${esc(t(key))}</a>`
+                `<a class="${page === id ? "on" : ""}" href="${href}">${esc(t(key))}</a>`
             )
             .join("")}
         </nav>
@@ -344,6 +378,7 @@
         <input class="field" name="email" type="email" required placeholder="${esc(t("email"))}"/>
         <input class="field" name="password" type="password" required minlength="4" placeholder="${esc(t("password"))}"/>
         <button class="btn primary" type="submit">${esc(signup ? t("signup") : t("login"))}</button>
+        <p class="muted${authError ? "" : " hidden"}">${esc(authMessage)}</p>
         <button class="btn" type="button" data-act="${signup ? "login" : "signup"}">${esc(signup ? t("haveAccount") : t("noAccount"))}</button>
       </form>
     </div>`;
@@ -384,7 +419,7 @@
         return `<article class="row" id="team-${slug(team.name)}">
           <div class="row-main">
             <div class="rank">${team.rank}</div>
-            <div class="team">${crest(team.crest)}<div><a href="teams.html#${slug(team.name)}">${esc(team.name)}</a><small>${esc(tr(team.sub))}</small>${zone}</div></div>
+            <div class="team">${crest(team.crest)}<div><a href="leaderboards.html#team-${slug(team.name)}">${esc(team.name)}</a><small>${esc(tr(team.sub))}</small>${zone}</div></div>
             <div class="pts"><strong>${team.points}</strong><i style="--share:${share}"></i></div>
             <div class="stat">${team.titles}</div>
             <div class="stat">${team.wins}</div>
@@ -414,7 +449,7 @@
             <div class="team"><span class="avatar">${img}</span><div><a href="players.html#${slug(p.name)}">${esc(p.name)}</a><small>${esc(tr(p.sub))}</small></div></div>
             <div class="pts"><strong>${p.points}</strong><i style="--share:${share}"></i></div>
             <div class="stat">${p.titles}</div>
-            <div class="stat"><a href="teams.html#${slug(p.team)}">${esc(p.team)}</a></div>
+            <div class="stat"><a href="leaderboards.html">${esc(p.team)}</a></div>
             <button class="chev" type="button" data-act="expand" aria-label="${esc(p.name)}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m4 6 4 4 4-4"/></svg></button>
           </div>
           <div class="detail"><p>${esc(tr(p.best))} · ${p.events}</p></div>
@@ -437,9 +472,6 @@
         <span class="field-label">${esc(t("competition"))}</span>
         <select class="field" aria-label="${esc(t("competition"))}">
           <option>${esc(t("all"))}</option>
-          <option>Daily Cup #1</option>
-          <option>Daily Cup #2</option>
-          <option>Daily Cup #3</option>
         </select>
       </div>
       ${
@@ -490,71 +522,20 @@
         <p><a class="gold-link" href="leaderboards.html">${esc(t("fullBoard"))}</a></p>
       </div>
     </section>
-    <section class="section panel">
-      <h2>${esc(t("recruitTitle"))}</h2>
-      <p class="muted">${esc(t("recruitText"))}</p>
-      <div class="cards">
-        <article class="card"><h3>${esc(t("lookingTeams"))}</h3><p>TvD · AR</p><p>primeeesport · SMG</p></article>
-        <article class="card"><h3>${esc(t("lookingPlayers"))}</h3><p>MGRALL · SMG</p><p>zenus · SMG</p></article>
-        <article class="card"><a class="btn primary" href="roster.html">${esc(t("roster"))}</a></article>
-      </div>
-    </section>
     ${cups()}`;
   }
 
-  const CUPS = [
-    {
-      id: "cup-3",
-      name: "Daily Cup #3",
-      ended: "4 نوفمبر 2026",
-      start: "1 نوفمبر 2026",
-      time: "8:00 م",
-      seats: 47,
-      cap: 64,
-      champion: "soulmate",
-      crest: "SOUL",
-      foe: "X 2.0",
-      foeCrest: "X",
-      score: [3, 1],
-      range: "1 نوفمبر 2026 – 4 نوفمبر 2026",
-    },
-    {
-      id: "cup-2",
-      name: "Daily Cup #2",
-      ended: "30 أكتوبر 2026",
-      start: "28 أكتوبر 2026",
-      time: "8:00 م",
-      seats: 51,
-      cap: 64,
-      champion: "Vamo",
-      crest: "VAMO",
-      foe: "ASTRO White",
-      foeCrest: "AS",
-      score: [3, 2],
-      range: "28 أكتوبر 2026 – 30 أكتوبر 2026",
-    },
-    {
-      id: "cup-1",
-      name: "Daily Cup #1",
-      ended: "26 أكتوبر 2026",
-      start: "26 أكتوبر 2026",
-      time: "6:00 م",
-      seats: 39,
-      cap: 64,
-      champion: "Xx",
-      crest: "XX",
-      foe: "",
-      foeCrest: "",
-      score: null,
-      range: "26 أكتوبر 2026",
-    },
-  ];
+  const CUPS = [];
 
   function cupLabel(key) {
     const en = {
       ended: "Ended",
       cup: "Tournament",
       start: "Start time",
+      startDate: "Start date",
+      endDate: "End date",
+      prizeAmount: "Prize",
+      gameName: "Game",
       format: "Match format",
       seats: "Seats",
       teamsWord: "teams",
@@ -563,6 +544,8 @@
       filter: "Filter and sort",
       all: "All",
       finished: "Finished",
+      live: "Live",
+      soon: "Upcoming",
       pointsHero: "ranking points for the champion",
       champion: "Tournament champion",
       prize: "Grand Final",
@@ -588,6 +571,10 @@
       ended: "منتهية",
       cup: "بطولة",
       start: "موعد البداية",
+      startDate: "تاريخ البداية",
+      endDate: "تاريخ النهاية",
+      prizeAmount: "الجائزة",
+      gameName: "اللعبة",
       format: "نظام المباراة",
       seats: "المقاعد",
       teamsWord: "فريقًا",
@@ -596,6 +583,8 @@
       filter: "تصفية وترتيب",
       all: "الكل",
       finished: "منتهية",
+      live: "جارية",
+      soon: "قادمة",
       pointsHero: "نقطة تصنيف للبطل",
       champion: "بطل البطولة",
       prize: "Grand Final",
@@ -633,71 +622,179 @@
       .join("");
   }
 
-  function cupCards() {
-    const list = cupOrder === "new" ? CUPS : [...CUPS].reverse();
+  function showWhen(value, options) {
+    return window.MHWhen ? window.MHWhen.format(value, options) : String(value || "");
+  }
+
+  function cupSpan(cup) {
+    const start = showWhen(cup.startAt || cup.start, { hint: cup.time || "" });
+    const end = cup.endedAt ? showWhen(cup.endedAt, { time: false }) : "";
+    const startDay = showWhen(cup.startAt || cup.start, { hint: cup.time || "", time: false });
+    if (!end || end === startDay) return start;
+    return `${start} – ${end}`;
+  }
+
+  function instant(value) {
+    const parsed = window.MHWhen ? window.MHWhen.parse(value) : null;
+    return parsed && parsed.time ? parsed.date.getTime() : NaN;
+  }
+
+  function listingStatus(row) {
+    if (row.status === "live" || row.status === "ended") return row.status;
+    const start = instant(row.start_at);
+    const end = instant(row.end_at);
+    const now = Date.now();
+    if (Number.isFinite(end) && end < now) return "ended";
+    if (Number.isFinite(start) && start <= now && (!Number.isFinite(end) || end >= now)) return "live";
+    return "soon";
+  }
+
+  function cupList() {
+    const daily = cupOrder === "new" ? CUPS : [...CUPS].reverse();
+    const list = [...liveCups, ...daily];
     const q = cupQuery.trim().toLowerCase();
     return list
-      .filter((cup) => cupFilter === "all" || cupFilter === "ended")
-      .filter((cup) => !q || cup.name.toLowerCase().includes(q))
-      .map((cup) => {
-        const pct = Math.round((cup.seats / cup.cap) * 100);
-        return `<a class="t-card" data-cup="${esc(cup.name.toLowerCase())}" href="tournaments.html#${cup.id}">
-          <div class="t-cover">
-            <img src="media/card-glass.webp" alt="" />
-            <img class="t-logo" src="media/mw-logo.webp" alt="" />
-            <span class="t-badge done"><i></i>${esc(cupLabel("ended"))}</span>
-            <span class="t-badge kind">${esc(cupLabel("cup"))}</span>
-          </div>
-          <div class="t-body">
-            <h3>${esc(cup.name)}</h3>
-            <p class="t-ended"><i></i>${lang === "en" ? "Ended" : "انتهت في"} ${esc(cup.ended)}</p>
-            <div class="t-split">
-              <div><span>${esc(cupLabel("start"))}</span><b>${esc(cup.start)}</b><small>${esc(cup.time)} · ${lang === "en" ? "Saudi Arabia" : "السعودية"}</small></div>
-              <div><span>${esc(cupLabel("format"))}</span><b>BO3</b><small>BO5 Final</small></div>
-            </div>
-            <div class="t-seats">
-              <span>${esc(cupLabel("seats"))}</span>
-              <b><bdi dir="ltr">${cup.seats} / ${cup.cap}</bdi> ${esc(cupLabel("teamsWord"))}</b>
-            </div>
-            <div class="t-bar"><i style="width:${pct}%"></i></div>
-            <span class="t-go">${esc(cupLabel("results"))} <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m10 4-4 4 4 4"/></svg></span>
-          </div>
-        </a>`;
-      })
-      .join("");
+      .filter((cup) => cupFilter === "all" || cup.status === cupFilter)
+      .filter((cup) => gameFilter === "all" || (cup.game || "cod") === gameFilter)
+      .filter((cup) => !q || cup.name.toLowerCase().includes(q));
+  }
+
+  function cupBlurb(cup) {
+    if (cup.made) return cup.summary || (lang === "en" ? "Tournament created on Female MENA." : "بطولة على فيميل مينا.");
+    if (lang === "en") return `Daily cup on BO3, with a BO5 final. Champion: ${cup.champion}.`;
+    return `بطولة يومية بنظام BO3 والنهائي BO5. البطل ${cup.champion}.`;
+  }
+
+  function prizeParts(cup) {
+    const amount = String(cup.prize || "").trim();
+    if (!amount) return null;
+    const number = Number(amount.replace(/,/g, ""));
+    const shown = Number.isFinite(number) ? number.toLocaleString("en-US") : amount;
+    const currency = cup.currency === "SAR" ? (lang === "en" ? "SAR" : "ر.س") : cup.currency || "";
+    return { shown, currency };
+  }
+
+  function tourCard(cup) {
+    const statusWord = cupLabel(cup.status === "ended" ? "ended" : cup.status === "live" ? "live" : "soon");
+    const art = cup.image || "media/card-glass-purple.webp";
+    const showLogo = !cup.image && cup.game !== "valorant";
+    const badge = cup.status === "live" ? "live" : cup.status === "soon" ? "soon" : "done";
+    const game = cup.game === "valorant" ? "Valorant" : "Call of Duty";
+    const prize = prizeParts(cup);
+    const prizeHtml = prize
+      ? `${esc(prize.shown)}${prize.currency ? ` <small>${esc(prize.currency)}</small>` : ""}`
+      : "—";
+    return `<a class="t-card" data-cup="${esc(cup.name.toLowerCase())}" href="tournaments.html#${cup.id}">
+      <div class="t-cover">
+        <img src="${esc(art)}" alt="" />
+        ${showLogo ? `<img class="t-logo" src="media/mw-logo.webp" alt="" />` : ""}
+        <span class="t-badge ${badge}"><i></i>${esc(statusWord)}</span>
+        ${cup.startAt || cup.start ? `<span class="t-badge when">${esc(showWhen(cup.startAt || cup.start, { hint: cup.time || "", short: true }))}</span>` : ""}
+      </div>
+      <div class="t-body">
+        <h3>${esc(cup.name)}</h3>
+        <div class="t-facts">
+          <div class="t-prize"><span>${esc(cupLabel("prizeAmount"))}</span><b dir="ltr">${prizeHtml}</b></div>
+          <div class="t-game"><span>${esc(cupLabel("gameName"))}</span><b>${esc(game)}</b></div>
+        </div>
+        <span class="t-go">${esc(cupLabel("results"))}</span>
+      </div>
+    </a>`;
+  }
+
+  function tourCards() {
+    const list = cupList();
+    if (!list.length) return `<p class="muted">${lang === "en" ? "No tournaments in this list." : "لا توجد بطولات في هذا التصنيف."}</p>`;
+    return `<div class="t-grid">${list.map((cup) => tourCard(cup)).join("")}</div>`;
+  }
+
+  function tourFilters() {
+    const pills = [
+      ["all", lang === "en" ? "All tournaments" : "كل البطولات"],
+      ["live", lang === "en" ? "Live" : "جارية"],
+      ["soon", lang === "en" ? "Upcoming" : "القادمة"],
+      ["ended", lang === "en" ? "Finished" : "المنتهية"],
+    ];
+    const games = [
+      ["cod", "Call of Duty"],
+      ["valorant", "Valorant"],
+    ];
+    return `<div class="tour-bar">
+      <div class="tour-games">
+        ${games.map(([id, label]) => `<button type="button" class="tour-game${gameFilter === id ? " on" : ""}" data-act="cup-game" data-game="${id}"><i></i>${label}</button>`).join("")}
+      </div>
+      <div class="tour-pills">
+        ${pills.map(([id, label]) => `<button type="button" class="${cupFilter === id ? "on" : ""}" data-act="cup-filter" data-filter="${id}">${esc(label)}</button>`).join("")}
+      </div>
+    </div>`;
+  }
+
+  function gameHeading() {
+    if (gameFilter === "valorant") return "VALORANT / TOURNAMENTS";
+    if (gameFilter === "cod") return "CALL OF DUTY / TOURNAMENTS";
+    return "CALL OF DUTY · VALORANT / TOURNAMENTS";
   }
 
   function cups() {
-    return `<section class="section" id="community">
+    return `<section class="section tour-home">
+      <p class="tour-label">${gameHeading()}</p>
       <h2>${esc(t("tournaments"))}</h2>
-      <div class="t-grid">${cupCards()}</div>
+      ${tourCards()}
     </section>`;
   }
 
   function tournamentsPage() {
-    const cup = CUPS.find((item) => location.hash === "#" + item.id);
+    const hash = location.hash.slice(1);
+    const made = liveCups.find((item) => item.id === hash);
+    if (made) return madeDetail(made);
+    const cup = CUPS.find((item) => hash === item.id);
     if (cup) return cupDetail(cup);
-    const shown = CUPS.filter((item) => !cupQuery.trim() || item.name.toLowerCase().includes(cupQuery.trim().toLowerCase()));
-    return `<header class="t-head">
-        <div>
-          <h1>${esc(t("tournaments"))}</h1>
-          <p class="lede">${shown.length} ${lang === "en" ? "tournaments" : "بطولات"}</p>
-        </div>
+    return `<header class="tour-page">
+        <p class="tour-kicker"><i></i>JOIN THE COMPETITION</p>
+        <h1>${lang === "en" ? "All tournaments" : "كل البطولات"}</h1>
+        <p class="lede">${lang === "en" ? "Compete in the cup and build the match with your team." : "تنافس في البطولة وابنِ المنافسة مع فريقك."}</p>
       </header>
-      <div class="t-tools">
-        <label class="t-search">
-          <input data-cup-search value="${esc(cupQuery)}" placeholder="${esc(cupLabel("search"))}" />
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        </label>
-        <div class="t-tools-row">
-          <div class="t-pills">
-            <button type="button" class="${cupFilter === "all" ? "on" : ""}" data-act="cup-filter" data-filter="all"><span>${esc(cupLabel("all"))}</span><b>3</b></button>
-            <button type="button" class="${cupFilter === "ended" ? "on" : ""}" data-act="cup-filter" data-filter="ended"><span>${esc(cupLabel("finished"))}</span><b>3</b></button>
+      ${tourFilters()}
+      <p class="tour-label">${gameHeading()}</p>
+      ${tourCards()}`;
+  }
+
+  function madeDetail(cup) {
+    const stage = cup.stage || {};
+    const format = stage.format === "double" ? (lang === "en" ? "Double elimination" : "خروج مزدوج") : (lang === "en" ? "Single elimination" : "خروج مباشر");
+    const match = [stage.match, stage.final ? `${lang === "en" ? "Final" : "النهائي"} ${stage.final}` : ""].filter(Boolean).join(" · ");
+    const prize = cup.prize ? `${cup.prize} ${cup.currency || ""}`.trim() : (lang === "en" ? "None" : "لا يوجد");
+    const banner = cup.banner || "";
+    const uploaded = banner.startsWith("media/cups/");
+    const picture = banner || (cup.game === "valorant" ? "" : "media/card-glass-purple.webp");
+    const showLogo = !uploaded && cup.game !== "valorant";
+    const statusWord = cupLabel(cup.status === "ended" ? "ended" : cup.status === "live" ? "live" : "soon");
+    const badge = cup.status === "live" ? "live" : cup.status === "soon" ? "soon" : "done";
+    const pct = cup.cap ? Math.min(100, Math.round((Number(cup.seats) / Number(cup.cap)) * 100)) : 0;
+    const when = showWhen(cup.startAt) || "—";
+    const until = cup.endAt ? showWhen(cup.endAt) : "";
+    return `<p class="crumb"><a href="tournaments.html">${esc(cupLabel("back"))}</a> <span>/</span> ${esc(cup.name)}</p>
+      <section class="cup-hero">
+        ${picture ? `<img class="cup-hero-bg${uploaded ? " is-photo" : ""}" src="${esc(picture)}" alt="" />` : ""}
+        <div class="cup-hero-shade"></div>
+        <span class="t-badge ${badge}"><i></i>${esc(statusWord)}</span>
+        <span class="t-badge kind">${esc(cupLabel("cup"))}</span>
+        <div class="cup-hero-copy">
+          ${showLogo ? `<img class="cup-hero-logo" src="media/mw-logo.webp" alt="" />` : ""}
+          <h1>${esc(cup.name)}</h1>
+          ${cup.summary ? `<p class="lede">${esc(cup.summary)}</p>` : ""}
+          <div class="hero-facts">
+            <div><span>${esc(cupLabel("start"))}</span><b>${esc(when)}</b></div>
+            ${until ? `<div><span>${esc(cupLabel("endDate"))}</span><b>${esc(until)}</b></div>` : ""}
+            <div><span>${esc(cupLabel("seats"))}</span><b dir="ltr">${cup.seats} / ${cup.cap}</b><div class="t-bar"><i style="width:${pct}%"></i></div></div>
           </div>
-          <button class="t-sort" type="button" data-act="cup-sort">${esc(cupLabel("filter"))} <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
+          <p class="hero-reward"><span>${esc(cupLabel("prizeAmount"))}</span><b dir="ltr">${esc(prize)}</b></p>
         </div>
-      </div>
-      <div class="t-grid">${cupCards() || `<p class="muted">${lang === "en" ? "No tournaments match that search." : "لا توجد بطولة بهذا الاسم."}</p>`}</div>`;
+      </section>
+      <div class="tour-row">
+        <article class="tour-card"><div class="tour-top"><h3>${esc(cupLabel("format"))}</h3><p>${esc(format)}${match ? ` · ${esc(match)}` : ""}</p></div></article>
+        <article class="tour-card"><div class="tour-top"><h3>${esc(cupLabel("rules"))}</h3><p>${esc(cup.rules || cup.info || (lang === "en" ? "Rules will be added by the organizer." : "يضيف المنظم القوانين هنا."))}</p></div></article>
+      </div>`;
   }
 
   function pairRound(names, scores) {
@@ -905,26 +1002,24 @@
               : "بطولة يومية رسمية بأسلوب 4 ضد 4 على Modern Warfare. تُضاف نقاط المركز إلى تصنيف Female MENA بعد انتهاء البطولة."
           }</p>
         </article>
-        <p class="cup-closed"><i></i> ${esc(cupLabel("closed"))} <b>${esc(cup.range)}</b></p>
+        <p class="cup-closed"><i></i> ${esc(cupLabel("closed"))} <b>${esc(cupSpan(cup))}</b></p>
         <p class="muted">${esc(cupLabel("ask"))} <a class="gold-link" href="support.html">${esc(cupLabel("contact"))}</a></p>
       </div>`;
     return `<div class="cup-page" id="${cup.id}">
       <p class="crumb"><a href="tournaments.html">${esc(cupLabel("back"))}</a> <span>/</span> ${esc(cup.name)}</p>
       <section class="cup-hero${cupTab === "format" ? " is-hidden" : ""}">
-        <img class="cup-hero-bg" src="media/card-glass.webp" alt="" />
+        <img class="cup-hero-bg" src="media/card-glass-purple.webp" alt="" />
         <div class="cup-hero-shade"></div>
-        <img class="cup-hero-logo" src="media/mw-logo.webp" alt="" />
+        <span class="t-badge done"><i></i>${esc(cupLabel("ended"))}</span>
+        <span class="t-badge kind">${esc(cupLabel("cup"))}</span>
         <div class="cup-hero-copy">
-          <div class="t-badge-row">
-            <span class="t-badge done"><i></i>${esc(cupLabel("ended"))}</span>
-            <span class="t-badge kind">${esc(cupLabel("cup"))}</span>
-          </div>
+          <img class="cup-hero-logo" src="media/mw-logo.webp" alt="" />
           <h1>${esc(cup.name)}</h1>
           <div class="hero-facts">
-            <div><span>${esc(cupLabel("start"))}</span><b>${esc(cup.start)}</b><small>${esc(cup.time)} · ${lang === "en" ? "Saudi Arabia" : "السعودية"}</small></div>
+            <div><span>${esc(cupLabel("start"))}</span><b>${esc(showWhen(cup.startAt || cup.start, { hint: cup.time || "" }))}</b></div>
             <div><span>${esc(cupLabel("seats"))}</span><b dir="ltr">${cup.seats} / ${cup.cap}</b><div class="t-bar"><i style="width:${pct}%"></i></div></div>
-            <div><span>${lang === "en" ? "Points" : "النقاط"}</span><b>400</b><small>${esc(cupLabel("pointsHero"))}</small></div>
           </div>
+          <p class="hero-reward"><span>${lang === "en" ? "Reward" : "المكافأة"}</span><b>400 ${esc(cupLabel("pointsHero"))}</b></p>
         </div>
       </section>
       <div class="cup-layout">
@@ -1002,22 +1097,6 @@
           <p class="muted">${lang === "en" ? "A 4-player team wins: 400 ÷ 4 = 100 points each, and the team has 400. If one player moves, the old team drops to 300 and the new team gains 100." : "فاز فريق من 4 لاعبين بالبطولة: 400 ÷ 4 = 100 نقطة لكل لاعب، ونقاط الفريق 400. إذا انتقل أحد لاعبيه، تصبح نقاط الفريق الأول 300 وتزيد نقاط الفريق الجديد 100."}</p>
         </article>
       </div>`;
-  }
-
-  function teamsPage() {
-    return `<header class="page-head"><h1>${esc(t("teams"))}</h1><p class="lede">${esc(t("teamLede"))}</p></header>
-      <div class="cards">${teams
-        .map(
-          (team) => `<article class="card" id="${slug(team.name)}">
-          <p class="kicker">#${team.rank}</p>
-          <h3>${crest(team.crest)} ${esc(team.name)}</h3>
-          <p>${esc(tr(team.sub))}</p>
-          <p class="num" style="color:var(--accent);font-family:Manrope,sans-serif;font-weight:800;font-size:28px">${team.points}</p>
-          <p>${(team.players || []).map((p) => esc(p.name)).join(" · ") || esc(t("noRoster"))}</p>
-          <a class="gold-link" href="leaderboards.html#team-${slug(team.name)}">${esc(t("leaderboards"))}</a>
-        </article>`
-        )
-        .join("")}</div>`;
   }
 
   const LIVE_MATCHES = [
@@ -1132,6 +1211,11 @@
     </div>`;
   }
 
+  function matchWhen(match) {
+    const cup = CUPS.find((item) => item.name === match.cup);
+    return cup ? showWhen(cup.startAt || cup.start, { hint: cup.time || "" }) : "";
+  }
+
   function matchesPage() {
     const current = LIVE_MATCHES.find((item) => location.hash === "#" + item.id);
     if (current) return matchDetail(current);
@@ -1145,7 +1229,7 @@
         <b>${esc(match.a.name)}</b>
         <strong dir="ltr">${match.score[0]} – ${match.score[1]}</strong>
         <b>${esc(match.b.name)}</b>
-        <small>${esc(match.cup)} · ${esc(match.round)} · ${esc(match.format)}</small>
+        <small>${esc(match.cup)} · ${esc(match.round)} · ${esc(match.format)}${matchWhen(match) ? ` · ${esc(matchWhen(match))}` : ""}</small>
       </a>`
     ).join("")}</div>`;
   }
@@ -1163,9 +1247,6 @@
     if (page === "matches") return matchesPage();
     if (page === "leagues")
       return simple(t("leagues"), `<p class="muted">${esc(t("emptyLeagues"))}</p>`);
-    if (page === "teams") return teamsPage();
-    if (page === "partners")
-      return simple(t("partners"), `<p class="muted">${lang === "en" ? "Partner placements for the Female MENA season appear in this space." : "مساحات شركاء موسم Female MENA تظهر في هذه الصفحة."}</p>`);
     if (page === "support")
       return `<header class="page-head"><h1>${esc(t("support"))}</h1></header>
         <form class="card stack" data-support="1">
@@ -1175,14 +1256,6 @@
           <button class="btn primary" type="submit">${esc(t("send"))}</button>
           <p class="muted hidden" data-sent="1">${esc(t("sent"))}</p>
         </form>`;
-    if (page === "roster")
-      return `<header class="page-head"><h1>${esc(t("recruitTitle"))}</h1><p class="lede">${esc(t("recruitText"))}</p></header>
-        <div class="cards">
-          <article class="card"><h3>TvD</h3><p>${lang === "en" ? "Looking for AR · 6 days ago" : "يبحث عن AR · قبل 6 أيام"}</p></article>
-          <article class="card"><h3>primeeesport</h3><p>${lang === "en" ? "Looking for an SMG player" : "يبحث عن لاعب SMG"}</p></article>
-          <article class="card"><h3>MGRALL</h3><p>SMG · ${lang === "en" ? "available" : "متاح"}</p></article>
-          <article class="card"><h3>zenus</h3><p>SMG · ${lang === "en" ? "available" : "متاح"}</p></article>
-        </div>`;
     if (page === "start")
       return simple(
         t("start"),
@@ -1194,6 +1267,7 @@
       return simple(t("privacy"), `<p class="muted">${esc(t("cookieBody"))}</p>`);
     if (page === "cookies")
       return simple(t("cookies"), `<p class="muted">${esc(t("cookieBody"))}</p>`);
+    if (page === "account") return `<div id="rbac"></div>`;
     return homePage();
   }
 
@@ -1212,6 +1286,8 @@
         } else if (act === "login" || act === "signup") {
           event.preventDefault();
           authMode = act;
+          authError = false;
+          authMessage = "";
           render();
         } else if (act === "close-auth") {
           if (event.target === el) {
@@ -1220,7 +1296,11 @@
           }
         } else if (act === "logout") {
           user = "";
+          role = "";
+          authError = false;
           localStorage.removeItem("mh-user");
+          localStorage.removeItem("mh-role");
+          localStorage.removeItem("mh-token");
           render();
         } else if (act === "cookie") {
           cookie = el.dataset.choice;
@@ -1234,6 +1314,10 @@
           el.closest(".row").classList.toggle("open");
         } else if (act === "cup-filter") {
           cupFilter = el.dataset.filter;
+          render();
+          return;
+        } else if (act === "cup-game") {
+          gameFilter = gameFilter === el.dataset.game ? "all" : el.dataset.game;
           render();
           return;
         } else if (act === "cup-sort") {
@@ -1263,12 +1347,44 @@
     });
     const form = document.querySelector("[data-auth-form]");
     if (form) {
-      form.addEventListener("submit", (event) => {
+      form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const data = new FormData(form);
-        user = data.get("name") || String(data.get("email") || "").split("@")[0] || "Player";
+        const email = String(data.get("email") || "").trim().toLowerCase();
+        const password = String(data.get("password") || "");
+        const name = String(data.get("name") || "").trim();
+        const signup = authMode === "signup";
+        let result = {};
+        try {
+          const res = await fetch(signup ? "/api/auth/register" : "/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password, name }),
+          });
+          result = await res.json();
+          if (!res.ok) throw new Error(result.error || "invalid");
+        } catch (error) {
+          const code = result.error || error.message;
+          const copy = {
+            invalid: lang === "en" ? "Email or password is wrong." : "البريد أو كلمة المرور غير صحيحة.",
+            suspended: lang === "en" ? "This account is suspended." : "هذا الحساب موقوف.",
+            taken: lang === "en" ? "That email is already registered." : "هذا البريد مسجّل من قبل.",
+            weak: lang === "en" ? "Use a name and a password of at least 8 characters." : "اكتب الاسم وكلمة مرور من 8 أحرف على الأقل.",
+            locked: lang === "en" ? "Too many attempts. Wait and try again." : "محاولات كثيرة. انتظر ثم أعد المحاولة.",
+          };
+          authError = true;
+          authMessage = copy[code] || (lang === "en" ? "Sign-in is unavailable right now." : "تسجيل الدخول غير متاح الآن.");
+          render();
+          return;
+        }
+        user = result.user.name;
+        role = result.user.role;
+        authError = false;
+        localStorage.setItem("mh-token", result.token);
         localStorage.setItem("mh-user", user);
+        localStorage.setItem("mh-role", role);
         authMode = null;
+        if (page === "admin") location.replace("account.html");
         render();
       });
     }
@@ -1316,6 +1432,13 @@
       place();
       requestAnimationFrame(place);
     }
+    const cupStatus = document.querySelector("[data-cup-status]");
+    if (cupStatus) {
+      cupStatus.addEventListener("change", () => {
+        cupFilter = cupStatus.value;
+        render();
+      });
+    }
     const bracketSidePick = document.querySelector("[data-bracket-side]");
     if (bracketSidePick) {
       bracketSidePick.addEventListener("change", () => {
@@ -1348,8 +1471,52 @@
     }
   }
 
+  async function loadLiveCups() {
+    try {
+      const res = await fetch("/api/public/tournaments", { cache: "no-store" });
+      const data = await res.json();
+      liveCups = (data.tournaments || []).map((row) => ({
+        id: "t-" + row.id,
+        made: true,
+        name: row.name,
+        game: row.game,
+        summary: row.summary || "",
+        startAt: row.start_at || "",
+        endAt: row.end_at || "",
+        start: row.start_at || "",
+        end: row.end_at || "",
+        seats: row.seats || 0,
+        cap: row.cap || 16,
+        status: listingStatus(row),
+        rules: row.rules || "",
+        info: row.info || "",
+        stage: row.stage,
+        prize: row.prize || "",
+        currency: row.currency || "",
+        image: row.image || "",
+        banner: row.banner || "",
+      }));
+    } catch {
+      liveCups = [];
+    }
+    const stamp = JSON.stringify(liveCups);
+    const changed = stamp !== cupStamp;
+    cupStamp = stamp;
+    return changed;
+  }
+
   function render() {
+    if (page === "admin") {
+      const kind = localStorage.getItem("mh-role");
+      if (localStorage.getItem("mh-token") && (kind === "owner" || kind === "admin")) {
+        location.replace("account.html");
+        return;
+      }
+      shell(`<section class="rbac-denied"><h1>${lang === "en" ? "Access denied" : "الوصول مرفوض"}</h1><p>${lang === "en" ? "This account cannot open the staff desk." : "هذا الحساب لا يستطيع فتح لوحة الإدارة."}</p><button class="btn primary" type="button" data-act="login">${esc(t("login"))}</button></section>`);
+      return;
+    }
     shell(pageContent());
+    if (page === "account" && window.MHAccount) window.MHAccount.mount();
   }
 
   window.addEventListener("hashchange", () => {
@@ -1357,5 +1524,32 @@
     if (page === "tournaments") render();
   });
 
-  render();
+  let cupStamp = "";
+
+  async function refreshCups() {
+    if (page !== "home" && page !== "tournaments") return;
+    const changed = await loadLiveCups();
+    if (changed) render();
+  }
+
+  function watchCups() {
+    window.addEventListener("storage", (event) => {
+      if (event.key === "mh-cups-rev") refreshCups();
+    });
+    try {
+      const channel = new BroadcastChannel("mh-cups");
+      channel.onmessage = () => refreshCups();
+    } catch (error) {
+      /* this browser has no BroadcastChannel */
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") refreshCups();
+    });
+    setInterval(refreshCups, 20000);
+  }
+
+  if (page === "tournaments" || page === "home") {
+    loadLiveCups().then(render);
+    watchCups();
+  } else render();
 })();
