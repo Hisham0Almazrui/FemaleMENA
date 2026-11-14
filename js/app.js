@@ -326,9 +326,9 @@
           <p>${esc(t("footAbout"))}</p>
           <p class="foot-region">${esc(t("footRegion"))}</p>
           <div class="socs">
-            <a href="https://www.tiktok.com/@menahub_" target="_blank" rel="noreferrer" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.2 3c.4 2.4 1.7 4.1 3.8 4.6v2.4c-1.3 0-2.5-.4-3.6-1.1v6.4a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v2.5a3.2 3.2 0 1 0 2.2 3.1V3h2.4Z"/></svg></a>
-            <a href="https://x.com/MENAHUB_" target="_blank" rel="noreferrer" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.7 10.4 21 3h-1.8l-5.5 6.3L9.3 3H3.5l6.6 9.4L3.4 21h1.8l5.8-6.7 4.7 6.7h5.8l-6.8-9.6Zm-2 .9-.7-1L6.6 4.6h2.3l4.3 6.1.7 1 5.6 8h-2.3l-4.5-6.4Z"/></svg></a>
-            <a href="https://discord.com" target="_blank" rel="noreferrer" aria-label="Discord"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.2 8.6a7.6 7.6 0 0 1 3.8-1c.2 0 .3.1.4.2l.4 1.1a6.4 6.4 0 0 1 2.4 0l.4-1.1c.1-.1.2-.2.4-.2a7.6 7.6 0 0 1 3.8 1c.1 0 .2.1.2.2 1.2 1.8 1.9 4 2.1 6.1 0 .1 0 .2-.1.3a10 10 0 0 1-3.1 1.6c-.1 0-.2 0-.3-.1l-.5-.7c.2-.1.4-.2.6-.3 0 0 .1-.1 0-.1-1.2.5-2.5.8-3.8.8s-2.6-.3-3.8-.8c-.1 0-.1.1 0 .1.2.1.4.2.6.3l-.5.7c-.1.1-.2.1-.3.1a10 10 0 0 1-3.1-1.6c-.1-.1-.1-.2-.1-.3.2-2.1.9-4.3 2.1-6.1.1-.1.1-.2.2-.2ZM10 14.2c.6 0 1.1-.6 1.1-1.3s-.5-1.3-1.1-1.3-1.1.6-1.1 1.3.5 1.3 1.1 1.3Zm4 0c.6 0 1.1-.6 1.1-1.3s-.5-1.3-1.1-1.3-1.1.6-1.1 1.3.5 1.3 1.1 1.3Z"/></svg></a>
+            <a href="https://www.tiktok.com/@femalemena" target="_blank" rel="noreferrer" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.2 3c.4 2.4 1.7 4.1 3.8 4.6v2.4c-1.3 0-2.5-.4-3.6-1.1v6.4a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v2.5a3.2 3.2 0 1 0 2.2 3.1V3h2.4Z"/></svg></a>
+            <a href="https://x.com/FemaleMENA_" target="_blank" rel="noreferrer" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.7 10.4 21 3h-1.8l-5.5 6.3L9.3 3H3.5l6.6 9.4L3.4 21h1.8l5.8-6.7 4.7 6.7h5.8l-6.8-9.6Zm-2 .9-.7-1L6.6 4.6h2.3l4.3 6.1.7 1 5.6 8h-2.3l-4.5-6.4Z"/></svg></a>
+            <a href="https://discord.com/invite/FemaleMENA" target="_blank" rel="noreferrer" aria-label="Discord"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.2 8.6a7.6 7.6 0 0 1 3.8-1c.2 0 .3.1.4.2l.4 1.1a6.4 6.4 0 0 1 2.4 0l.4-1.1c.1-.1.2-.2.4-.2a7.6 7.6 0 0 1 3.8 1c.1 0 .2.1.2.2 1.2 1.8 1.9 4 2.1 6.1 0 .1 0 .2-.1.3a10 10 0 0 1-3.1 1.6c-.1 0-.2 0-.3-.1l-.5-.7c.2-.1.4-.2.6-.3 0 0 .1-.1 0-.1-1.2.5-2.5.8-3.8.8s-2.6-.3-3.8-.8c-.1 0-.1.1 0 .1.2.1.4.2.6.3l-.5.7c-.1.1-.2.1-.3.1a10 10 0 0 1-3.1-1.6c-.1-.1-.1-.2-.1-.3.2-2.1.9-4.3 2.1-6.1.1-.1.1-.2.2-.2ZM10 14.2c.6 0 1.1-.6 1.1-1.3s-.5-1.3-1.1-1.3-1.1.6-1.1 1.3.5 1.3 1.1 1.3Zm4 0c.6 0 1.1-.6 1.1-1.3s-.5-1.3-1.1-1.3-1.1.6-1.1 1.3.5 1.3 1.1 1.3Z"/></svg></a>
           </div>
         </div>
         ${col(t("footInfo"), "INFORMATION", info)}
@@ -361,9 +361,9 @@
             .join("")}
         </nav>
         <div class="drawer-bottom">
-          <a href="https://x.com/MENAHUB_" target="_blank" rel="noreferrer">@MENAHUB_</a>
-          <a href="https://www.tiktok.com/@menahub_" target="_blank" rel="noreferrer">TikTok</a>
-          <a href="https://www.twitch.tv/menahub_" target="_blank" rel="noreferrer">Twitch</a>
+          <a href="https://x.com/FemaleMENA_" target="_blank" rel="noreferrer">@FemaleMENA_</a>
+          <a href="https://www.tiktok.com/@femalemena" target="_blank" rel="noreferrer">TikTok</a>
+          <a href="https://discord.com/invite/FemaleMENA" target="_blank" rel="noreferrer">Discord</a>
         </div>
       </aside>`;
   }
