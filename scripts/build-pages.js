@@ -32,13 +32,14 @@ ${page === "admin" ? '<meta name="robots" content="noindex, nofollow"/>' : ""}
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/site.css?v=59"/>
+<link rel="stylesheet" href="css/site.css?v=60"/>
 </head>
 <body data-page="${page}">
-<script src="js/data.js?v=59"></script>
-<script src="js/when.js?v=59"></script>
-<script src="js/account.js?v=59"></script>
-<script src="js/app.js?v=59"></script>
+<script src="js/data.js?v=60"></script>
+<script src="js/published.js?v=60"></script>
+<script src="js/when.js?v=60"></script>
+<script src="js/account.js?v=60"></script>
+<script src="js/app.js?v=60"></script>
 </body>
 </html>
 `;

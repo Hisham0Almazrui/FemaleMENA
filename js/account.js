@@ -29,6 +29,7 @@
   ];
 
   async function api(path, options = {}) {
+    if (window.MHPublished) return window.MHPublished.call(path, options);
     const res = await fetch(path, {
       method: options.method || "GET",
       headers: {

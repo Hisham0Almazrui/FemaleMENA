@@ -1356,13 +1356,11 @@
         const signup = authMode === "signup";
         let result = {};
         try {
-          const res = await fetch(signup ? "/api/auth/register" : "/api/auth/login", {
+          result = await window.MHPublished.call(signup ? "/api/auth/register" : "/api/auth/login", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password, name }),
+            body: { email, password, name },
           });
-          result = await res.json();
-          if (!res.ok) throw new Error(result.error || "invalid");
+          if (!result.ok) throw new Error(result.error || "invalid");
         } catch (error) {
           const code = result.error || error.message;
           const copy = {
@@ -1473,8 +1471,7 @@
 
   async function loadLiveCups() {
     try {
-      const res = await fetch("/api/public/tournaments", { cache: "no-store" });
-      const data = await res.json();
+      const data = await window.MHPublished.call("/api/public/tournaments");
       liveCups = (data.tournaments || []).map((row) => ({
         id: "t-" + row.id,
         made: true,

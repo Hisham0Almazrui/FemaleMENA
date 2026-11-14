@@ -1,0 +1,93 @@
+{
+  "accounts": [
+    {
+      "id": 1,
+      "email": "owner@femalemena.com",
+      "name": "Owner",
+      "role": "owner",
+      "salt": "3b798d7271f2f619165eba0c015ab911",
+      "hash": "68885f75eeec5513d72a700294ae44a4e9da9ef4962d82a2f3f71f20ba2425fe"
+    },
+    {
+      "id": 2,
+      "email": "admin@femalemena.com",
+      "name": "Admin",
+      "role": "admin",
+      "salt": "6f89b19f8941e1758f3860e3d78b488e",
+      "hash": "9d064524f21b968c43cf9c7c3ee8fa1ff4d1992a465563d7d580f64b9511411b"
+    },
+    {
+      "id": 3,
+      "email": "visitor@femalemena.com",
+      "name": "Visitor",
+      "role": "visitor",
+      "salt": "03bf65ebe7dbd98c6d9ec4db24184231",
+      "hash": "a8df9ea72222a792167b7383a577fa619d5f86851e74cc29f9bafe933bc0e2ef"
+    }
+  ],
+  "tournaments": [
+    {
+      "id": 1,
+      "game": "cod",
+      "name": "Night Cup",
+      "status": "pending",
+      "summary": "Call of Duty cup waiting for owner approval.",
+      "start_at": "20 نوفمبر 2026",
+      "end_at": "",
+      "seats": 0,
+      "cap": 32,
+      "rules": "",
+      "info": "",
+      "prize": "",
+      "currency": "",
+      "stage": null,
+      "image": "",
+      "banner": "",
+      "details": "{}"
+    },
+    {
+      "id": 2,
+      "game": "valorant",
+      "name": "Valorant Open",
+      "status": "open",
+      "summary": "Open Valorant registration for Female MENA.",
+      "start_at": "22 نوفمبر 2026",
+      "end_at": "",
+      "seats": 1,
+      "cap": 16,
+      "rules": "",
+      "info": "",
+      "prize": "",
+      "currency": "",
+      "stage": null,
+      "image": "",
+      "banner": "",
+      "details": "{}"
+    },
+    {
+      "id": 3,
+      "game": "cod",
+      "name": "LVX",
+      "status": "draft",
+      "summary": "ONLY FOR WIN ",
+      "start_at": "2026-12-21T18:00:00.000Z",
+      "end_at": "2026-12-22T19:30:00.000Z",
+      "seats": 0,
+      "cap": 16,
+      "rules": "Disconnects at the start of a map restart that map. A no-show 10 minutes after the match time loses by forfeit. Cheats and exploited bugs lead to disqualification.",
+      "info": "",
+      "prize": "5000",
+      "currency": "SAR",
+      "stage": {
+        "name": "dada",
+        "format": "single",
+        "match": "BO5",
+        "final": "BO7",
+        "third": true
+      },
+      "image": "media/cups/3-card.jpg?v=1794668810360",
+      "banner": "media/cups/3-banner.jpg?v=1794668810360",
+      "details": "{\"game\":\"cod\",\"name\":\"LVX\",\"summary\":\"ONLY FOR WIN \",\"prize\":\"5000\",\"currency\":\"SAR\",\"prizeNote\":\"\",\"visibility\":\"public\",\"status\":\"draft\",\"startAt\":\"2026-12-21T18:00:00.000Z\",\"endAt\":\"2026-12-22T19:30:00.000Z\",\"cardName\":\"surprise-meme-brown-1920x1080-18092.jpg\",\"bannerName\":\"5826691.jpg\",\"stages\":[{\"name\":\"dada\",\"format\":\"single\",\"match\":\"BO5\",\"final\":\"BO7\",\"third\":true}],\"rules\":\"Disconnects at the start of a map restart that map. A no-show 10 minutes after the match time loses by forfeit. Cheats and exploited bugs lead to disqualification.\",\"info\":\"\",\"entry\":\"teams\",\"cap\":\"16\",\"teamSize\":\"range\",\"players\":\"4\",\"regOpen\":\"\",\"regClose\":\"\",\"approval\":false,\"waitlist\":false,\"seeding\":false,\"checkin\":false,\"bonus\":0,\"season\":\"\",\"veto\":true,\"vetoMethod\":\"ban\",\"maps\":{\"hardpoint\":[\"Lithium\",\"Lotus\",\"Munition\",\"Reactor U92\",\"Rooftops\",\"Sentry\"],\"snd\":[\"Coal\",\"Lotus\",\"Munition\",\"Reactor U92\",\"Rooftops\",\"Silkworm\"],\"hijack\":[\"Lithium\",\"Lotus\",\"Munition\"]},\"mvp\":\"organizer\",\"ranking\":true,\"responseMin\":\"60\",\"noShow\":\"10\",\"hideStream\":true,\"cardUrl\":\"media/cups/3-card.jpg\",\"bannerUrl\":\"media/cups/3-banner.jpg\",\"imageRev\":1794668810360}"
+    }
+  ]
+}
