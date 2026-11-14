@@ -29,17 +29,19 @@ const html = (title, page) => `<!DOCTYPE html>
 <meta name="theme-color" content="#0C0C0D"/>
 ${page === "admin" ? '<meta name="robots" content="noindex, nofollow"/>' : ""}
 <title>${title}</title>
+<link rel="icon" href="favicon.png?v=63" type="image/png"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=63"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/site.css?v=62"/>
+<link rel="stylesheet" href="css/site.css?v=63"/>
 </head>
 <body data-page="${page}">
-<script src="js/data.js?v=62"></script>
-<script src="js/published.js?v=62"></script>
-<script src="js/when.js?v=62"></script>
-<script src="js/account.js?v=62"></script>
-<script src="js/app.js?v=62"></script>
+<script src="js/data.js?v=63"></script>
+<script src="js/published.js?v=63"></script>
+<script src="js/when.js?v=63"></script>
+<script src="js/account.js?v=63"></script>
+<script src="js/app.js?v=63"></script>
 </body>
 </html>
 `;
