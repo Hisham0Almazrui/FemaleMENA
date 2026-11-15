@@ -521,8 +521,6 @@
     ${cups()}`;
   }
 
-  const CUPS = [];
-
   function cupLabel(key) {
     const en = {
       ended: "Ended",
@@ -646,8 +644,7 @@
   }
 
   function cupList() {
-    const daily = cupOrder === "new" ? CUPS : [...CUPS].reverse();
-    const list = [...liveCups, ...daily];
+    const list = cupOrder === "new" ? [...liveCups] : [...liveCups].reverse();
     const q = cupQuery.trim().toLowerCase();
     return list
       .filter((cup) => cupFilter === "all" || cup.status === cupFilter)
@@ -743,8 +740,6 @@
     const hash = location.hash.slice(1);
     const made = liveCups.find((item) => item.id === hash);
     if (made) return madeDetail(made);
-    const cup = CUPS.find((item) => hash === item.id);
-    if (cup) return cupDetail(cup);
     return `<header class="tour-page">
         <p class="tour-kicker"><i></i>JOIN THE COMPETITION</p>
         <h1>${lang === "en" ? "All tournaments" : "كل البطولات"}</h1>
@@ -1095,40 +1090,7 @@
       </div>`;
   }
 
-  const LIVE_MATCHES = [
-    {
-      id: "xx-astro",
-      live: true,
-      cup: "Daily Cup #3",
-      round: "#12 Winners Round 2",
-      format: "BO3",
-      note: "أول مباراة له بالبطولة",
-      a: { name: "Xx", tag: "XX", role: "محور الفريق في البطولة", players: ["eclw", "Mishary", "Nero1", "RWZ"] },
-      b: { name: "ASTRO White", tag: "AS", role: "محور الفريق في البطولة", players: ["fahad1", "Hakari", "Lenfield", "MURD3R"] },
-      score: [1, 0],
-      maps: [
-        { name: "Rooftops", score: "6 – 4", side: "a", state: "done" },
-        { name: "Reactor U92", score: "4 – 3", side: "live", state: "live" },
-        { name: "Lithium", score: "—", side: "", state: "wait" },
-      ],
-    },
-    {
-      id: "tgoz-sunshine",
-      live: false,
-      cup: "Daily Cup #3",
-      round: "#8 Winners Round 1",
-      format: "BO3",
-      note: "أول مباراة له بالبطولة",
-      a: { name: "TGozteam", tag: "TRKY", role: "محور الفريق في البطولة", players: ["XLaGDaV25959551", "IBRA99238075", "evilsbadr7980301", "SALEH73818605", "Digsly12893477"] },
-      b: { name: "Sunshine", tag: "SURKN", role: "محور الفريق في البطولة", players: ["AclaRoca", "Shinobi", "Koushini", "abu_amwl"] },
-      score: [2, 0],
-      maps: [
-        { name: "Rooftops", score: "6 – 2", side: "a", state: "done" },
-        { name: "Reactor U92", score: "6 – 3", side: "a", state: "done" },
-        { name: "Lithium", score: "—", side: "", state: "wait" },
-      ],
-    },
-  ];
+  let liveMatches = [];
 
   function rosterLines(side) {
     return side.players
@@ -1156,7 +1118,7 @@
       ? `<span class="t-badge live"><i></i>${lang === "en" ? "Live" : "مباشر"}</span>`
       : `<span class="t-badge done"><i></i>${lang === "en" ? "Finished" : "منتهية"}</span>`;
     return `<div class="match-page">
-      <p class="crumb"><a href="tournaments.html#cup-3">${esc(t("tournaments"))}</a> <span>/</span> <a href="matches.html">${lang === "en" ? "Matches" : "المباريات"}</a> <span>/</span> ${esc(match.a.name)} ضد ${esc(match.b.name)}</p>
+      <p class="crumb"><a href="tournaments.html">${esc(t("tournaments"))}</a> <span>/</span> <a href="matches.html">${lang === "en" ? "Matches" : "المباريات"}</a> <span>/</span> ${esc(match.a.name)} ضد ${esc(match.b.name)}</p>
       <p><a class="gold-link" href="matches.html">${lang === "en" ? "Back to matches" : "العودة إلى المباريات"}</a></p>
       <article class="m-board" dir="ltr">
         <header class="m-top">
@@ -1208,26 +1170,28 @@
   }
 
   function matchWhen(match) {
-    const cup = CUPS.find((item) => item.name === match.cup);
-    return cup ? showWhen(cup.startAt || cup.start, { hint: cup.time || "" }) : "";
+    return match.when ? showWhen(match.when) : "";
   }
 
   function matchesPage() {
-    const current = LIVE_MATCHES.find((item) => location.hash === "#" + item.id);
+    const current = liveMatches.find((item) => location.hash === "#" + item.id);
     if (current) return matchDetail(current);
-    return `<header class="t-head">
-      <h1>${esc(t("matches"))}</h1>
-      <p class="lede">${lang === "en" ? "Series in progress and finished matches from the daily cups." : "السلاسل الجارية والمباريات المنتهية من الكؤوس اليومية."}</p>
-    </header>
-    <div class="m-list">${LIVE_MATCHES.map(
-      (match) => `<a class="m-row" href="matches.html#${match.id}">
+    const rows = liveMatches
+      .map(
+        (match) => `<a class="m-row" href="matches.html#${match.id}">
         <span class="t-badge ${match.live ? "live" : "done"}"><i></i>${match.live ? (lang === "en" ? "Live" : "مباشر") : lang === "en" ? "Finished" : "منتهية"}</span>
         <b>${esc(match.a.name)}</b>
         <strong dir="ltr">${match.score[0]} – ${match.score[1]}</strong>
         <b>${esc(match.b.name)}</b>
-        <small>${esc(match.cup)} · ${esc(match.round)} · ${esc(match.format)}${matchWhen(match) ? ` · ${esc(matchWhen(match))}` : ""}</small>
+        <small>${esc(match.cup)} · ${esc(match.round)}${matchWhen(match) ? ` · ${esc(matchWhen(match))}` : ""}</small>
       </a>`
-    ).join("")}</div>`;
+      )
+      .join("");
+    return `<header class="t-head">
+      <h1>${esc(t("matches"))}</h1>
+      <p class="lede">${lang === "en" ? "Matches saved for the current tournaments." : "مباريات البطولات الحالية."}</p>
+    </header>
+    ${rows ? `<div class="m-list">${rows}</div>` : `<p class="muted">${lang === "en" ? "No matches yet." : "لا توجد مباريات بعد."}</p>`}`;
   }
 
   function simple(title, body) {
@@ -1473,10 +1437,42 @@
     }
   }
 
+  function sideFrom(name) {
+    const label = String(name || "TBD");
+    return { name: label, tag: label.slice(0, 3).toUpperCase(), role: "", players: [] };
+  }
+
+  async function loadLiveMatches() {
+    try {
+      const data = await window.MHPublished.call("/api/public/matches");
+      if (!data || data.ok === false || !Array.isArray(data.matches)) return false;
+      liveMatches = data.matches.map((row) => ({
+        id: "m-" + row.id,
+        live: row.status === "live",
+        cup: row.tournament || "",
+        round: row.round || "",
+        format: "",
+        note: "",
+        when: row.start_at || "",
+        a: sideFrom(row.team_a),
+        b: sideFrom(row.team_b),
+        score: [row.score_a == null ? "–" : row.score_a, row.score_b == null ? "–" : row.score_b],
+        maps: [],
+      }));
+    } catch {
+      return false;
+    }
+    const stamp = JSON.stringify(liveMatches);
+    const changed = stamp !== matchStamp;
+    matchStamp = stamp;
+    return changed;
+  }
+
   async function loadLiveCups() {
     try {
       const data = await window.MHPublished.call("/api/public/tournaments");
-      liveCups = (data.tournaments || []).map((row) => ({
+      if (!data || data.ok === false || !Array.isArray(data.tournaments)) return false;
+      liveCups = data.tournaments.map((row) => ({
         id: "t-" + row.id,
         made: true,
         name: row.name,
@@ -1498,7 +1494,7 @@
         banner: row.banner || "",
       }));
     } catch {
-      liveCups = [];
+      return false;
     }
     const stamp = JSON.stringify(liveCups);
     const changed = stamp !== cupStamp;
@@ -1522,18 +1518,21 @@
 
   window.addEventListener("hashchange", () => {
     cupTab = "overview";
-    if (page === "tournaments") render();
+    if (page === "tournaments" || page === "matches") render();
   });
 
   let cupStamp = "";
+  let matchStamp = "";
 
   async function refreshCups() {
-    if (page !== "home" && page !== "tournaments") return;
-    const changed = await loadLiveCups();
+    let changed = false;
+    if (page === "home" || page === "tournaments") changed = (await loadLiveCups()) || changed;
+    if (page === "matches") changed = (await loadLiveMatches()) || changed;
     if (changed) render();
   }
 
   function watchCups() {
+    window.addEventListener("mh-cups", () => refreshCups());
     window.addEventListener("storage", (event) => {
       if (event.key === "mh-cups-rev") refreshCups();
     });
@@ -1546,11 +1545,15 @@
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") refreshCups();
     });
+    window.addEventListener("pageshow", () => refreshCups());
     setInterval(refreshCups, 20000);
   }
 
-  if (page === "tournaments" || page === "home") {
-    loadLiveCups().then(render);
+  const opening = [];
+  if (page === "tournaments" || page === "home") opening.push(loadLiveCups());
+  if (page === "matches") opening.push(loadLiveMatches());
+  if (opening.length) {
+    Promise.all(opening).then(render);
     watchCups();
   } else render();
 })();

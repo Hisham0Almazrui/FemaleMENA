@@ -116,6 +116,11 @@
     } catch (error) {
       /* ignore */
     }
+    try {
+      window.dispatchEvent(new CustomEvent("mh-cups", { detail: { rev, id: id || 0 } }));
+    } catch (error) {
+      /* ignore */
+    }
   }
 
   window.MHWhen = { parse, format, toUtc, toInput, announce };

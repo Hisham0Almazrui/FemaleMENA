@@ -6,6 +6,7 @@
   };
   const RANKS = { owner: 100, admin: 50, visitor: 10 };
   let pack = null;
+  let mode = "";
 
   function bytesToHex(buffer) {
     return [...new Uint8Array(buffer)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -283,6 +284,14 @@
     if (method === "GET" && path === "/api/public/tournaments") {
       return result(200, { tournaments: publicRows(merged(data)) });
     }
+    if (method === "GET" && path === "/api/public/matches") {
+      const desk = loadDesk();
+      const matches = desk.matches.map((row) => {
+        const cup = merged(data).find((item) => String(item.id) === String(row.tournament_id));
+        return { ...row, tournament: cup ? cup.name : "", game: cup ? cup.game : "", start_at: cup ? cup.start_at : "" };
+      });
+      return result(200, { matches });
+    }
     if (method === "GET" && path === "/api/tournaments") {
       return result(200, { tournaments: merged(data) });
     }
@@ -435,6 +444,7 @@
       desk.matches.push(created);
       logAction(desk, account, "match.create", created.tournament_id, created.team_a + " vs " + created.team_b);
       saveDesk(desk);
+      changed();
       return result(201, { id: created.id });
     }
     const matchPath = path.match(/^\/api\/matches\/(\d+)$/);
@@ -447,6 +457,7 @@
         desk.matches = desk.matches.filter((item) => item !== row);
         logAction(desk, account, "match.delete", row.id, "");
         saveDesk(desk);
+        changed();
         return result(200, { ok: true });
       }
       if (method === "PATCH") {
@@ -456,6 +467,7 @@
         row.status = body.status || row.status;
         logAction(desk, account, "match.update", row.id, row.score_a + "-" + row.score_b);
         saveDesk(desk);
+        changed();
         return result(200, { ok: true });
       }
     }
@@ -695,30 +707,37 @@
     return null;
   }
 
+  async function chooseMode() {
+    if (mode) return mode;
+    if (/github\.io$/i.test(location.hostname)) {
+      mode = "static";
+      return mode;
+    }
+    try {
+      const probe = await fetch("/api/public/tournaments", { cache: "no-store" });
+      const text = await probe.text();
+      JSON.parse(text);
+      mode = probe.ok ? "api" : "static";
+    } catch {
+      mode = "static";
+    }
+    return mode;
+  }
+
   async function call(path, options) {
     const opts = options || {};
-    try {
-      const res = await fetch(path, {
-        method: opts.method || "GET",
-        headers: {
-          Authorization: "Bearer " + (localStorage.getItem("mh-token") || ""),
-          ...(opts.body ? { "Content-Type": "application/json" } : {}),
-        },
-        body: opts.body ? JSON.stringify(opts.body) : undefined,
-        cache: "no-store",
-      });
-      const text = await res.text();
-      let data = {};
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        data = null;
-      }
-      if (data && (res.ok || res.status !== 404)) return { ok: res.ok, status: res.status, ...data };
-    } catch {
-      /* the published site has no account server */
-    }
-    return staticCall(path, opts);
+    if ((await chooseMode()) === "static") return staticCall(path, opts);
+    const res = await fetch(path, {
+      method: opts.method || "GET",
+      headers: {
+        Authorization: "Bearer " + (localStorage.getItem("mh-token") || ""),
+        ...(opts.body ? { "Content-Type": "application/json" } : {}),
+      },
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+      cache: "no-store",
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, ...data };
   }
 
   window.MHPublished = { call };

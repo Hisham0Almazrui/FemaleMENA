@@ -368,6 +368,16 @@ function migrateTournamentTimes() {
 }
 migrateTournamentTimes();
 
+function listPublicMatches(req, res) {
+  const matches = db.prepare(
+    `SELECT matches.id, matches.tournament_id, matches.round, matches.team_a, matches.team_b, matches.score_a, matches.score_b, matches.status,
+            tournaments.name AS tournament, tournaments.game, tournaments.start_at
+     FROM matches JOIN tournaments ON tournaments.id = matches.tournament_id
+     ORDER BY matches.id DESC`
+  ).all();
+  send(res, 200, { matches });
+}
+
 function listPublicTournaments(req, res) {
   const rows = db.prepare(
     "SELECT id, game, name, status, summary, start_at, end_at, seats, cap, details FROM tournaments WHERE status != 'rejected' ORDER BY id DESC"
@@ -769,6 +779,7 @@ const routes = [
   ["DELETE", "/api/users/:id", deleteUser],
   ["GET", "/api/roles", listRoles],
   ["GET", "/api/public/tournaments", listPublicTournaments],
+  ["GET", "/api/public/matches", listPublicMatches],
   ["GET", "/api/tournaments", listTournaments],
   ["POST", "/api/tournaments", createTournament],
   ["PATCH", "/api/tournaments/:id", updateTournament],

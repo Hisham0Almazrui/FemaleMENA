@@ -934,7 +934,7 @@
   async function act(path, method, body) {
     const result = await api(path, { method, body });
     flash = result.ok ? "" : failure(result.error);
-    if (result.ok && window.MHWhen && (path.indexOf("/api/tournaments") === 0 || path.indexOf("/api/registrations") === 0)) window.MHWhen.announce();
+    if (result.ok && window.MHWhen && /^\/api\/(tournaments|registrations|matches)/.test(path)) window.MHWhen.announce();
     draw();
   }
 
@@ -965,5 +965,8 @@
   window.addEventListener("hashchange", () => {
     flash = "";
     if (document.body.dataset.page === "account") draw();
+  });
+  window.addEventListener("mh-cups", () => {
+    if (document.body.dataset.page === "account" && !cupDraft) draw();
   });
 })();
