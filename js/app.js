@@ -469,10 +469,6 @@
           <a class="${isTeams ? "on" : ""}" href="leaderboards.html">${esc(t("teamsTab"))}</a>
           <a class="${isTeams ? "" : "on"}" href="players.html">${esc(t("playersTab"))}</a>
         </div>
-        <span class="field-label">${esc(t("competition"))}</span>
-        <select class="field" aria-label="${esc(t("competition"))}">
-          <option>${esc(t("all"))}</option>
-        </select>
       </div>
       ${
         isTeams
@@ -1388,10 +1384,18 @@
     }
     const support = document.querySelector("[data-support]");
     if (support) {
-      support.addEventListener("submit", (event) => {
+      support.addEventListener("submit", async (event) => {
         event.preventDefault();
-        support.querySelector("[data-sent]").classList.remove("hidden");
-        support.reset();
+        const data = Object.fromEntries(new FormData(support).entries());
+        const result = window.MHPublished ? await window.MHPublished.call("/api/support", { method: "POST", body: data }) : { ok: false };
+        const sent = support.querySelector("[data-sent]");
+        if (result.ok) {
+          sent.classList.remove("hidden");
+          support.reset();
+        } else if (sent) {
+          sent.textContent = lang === "en" ? "The message could not be sent." : "تعذر إرسال الرسالة.";
+          sent.classList.remove("hidden");
+        }
       });
     }
     document.addEventListener(

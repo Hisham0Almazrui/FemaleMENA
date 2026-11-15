@@ -559,7 +559,14 @@ function listRegistrations(req, res, { actor }) {
     });
   }
   if (!guard(res, actor, "tournaments.join")) return;
-  send(res, 200, { registrations: db.prepare("SELECT * FROM registrations WHERE user_id = ?").all(actor.id) });
+  send(res, 200, {
+    registrations: db.prepare(
+      `SELECT registrations.*, teams.name AS team, tournaments.name AS tournament, tournaments.start_at
+       FROM registrations JOIN teams ON teams.id = registrations.team_id
+       JOIN tournaments ON tournaments.id = registrations.tournament_id
+       WHERE registrations.user_id = ? ORDER BY registrations.id DESC`
+    ).all(actor.id),
+  });
 }
 
 function createRegistration(req, res, { actor, body }) {
@@ -581,9 +588,23 @@ function createRegistration(req, res, { actor, body }) {
 
 function updateRegistration(req, res, { actor, body, params }) {
   if (!guard(res, actor, "registrations.approve")) return;
+  const row = db.prepare("SELECT * FROM registrations WHERE id = ?").get(Number(params.id));
+  if (!row) return send(res, 404, { error: "not-found" });
   const status = body.status === "rejected" ? "rejected" : "approved";
-  db.prepare("UPDATE registrations SET status = ? WHERE id = ?").run(status, Number(params.id));
+  if (row.status !== "rejected" && status === "rejected") db.prepare("UPDATE tournaments SET seats = CASE WHEN seats > 0 THEN seats - 1 ELSE 0 END WHERE id = ?").run(row.tournament_id);
+  if (row.status === "rejected" && status !== "rejected") db.prepare("UPDATE tournaments SET seats = seats + 1 WHERE id = ?").run(row.tournament_id);
+  db.prepare("UPDATE registrations SET status = ? WHERE id = ?").run(status, row.id);
   audit(actor.id, "registration.update", params.id, status);
+  send(res, 200, { ok: true });
+}
+
+function deleteRegistration(req, res, { actor, params }) {
+  if (!guard(res, actor, "tournaments.join")) return;
+  const row = db.prepare("SELECT * FROM registrations WHERE id = ?").get(Number(params.id));
+  if (!row || row.user_id !== actor.id) return send(res, 403, { error: "forbidden" });
+  db.prepare("DELETE FROM registrations WHERE id = ?").run(row.id);
+  if (row.status !== "rejected") db.prepare("UPDATE tournaments SET seats = CASE WHEN seats > 0 THEN seats - 1 ELSE 0 END WHERE id = ?").run(row.tournament_id);
+  audit(actor.id, "registration.leave", String(row.tournament_id), String(row.team_id));
   send(res, 200, { ok: true });
 }
 
@@ -652,6 +673,19 @@ function logs(req, res, { actor }) {
       `SELECT audit_logs.*, users.email FROM audit_logs LEFT JOIN users ON users.id = audit_logs.user_id ORDER BY audit_logs.id DESC LIMIT 80`
     ).all(),
   });
+}
+
+function createSupport(req, res, { body }) {
+  const name = String(body.name || "").trim().slice(0, 60);
+  const email = String(body.email || "").trim().slice(0, 80);
+  const message = String(body.message || "").trim().slice(0, 500);
+  if (name.length < 2 || !email.includes("@") || message.length < 2) return send(res, 400, { error: "weak" });
+  db.prepare("INSERT INTO comments (user_id, body, status, created_at) VALUES (?, ?, 'visible', ?)").run(
+    null,
+    `${name} <${email}>: ${message}`,
+    new Date().toISOString()
+  );
+  send(res, 201, { ok: true });
 }
 
 function comments(req, res, { actor, body, params }) {
@@ -750,6 +784,7 @@ const routes = [
   ["GET", "/api/registrations", listRegistrations],
   ["POST", "/api/registrations", createRegistration],
   ["PATCH", "/api/registrations/:id", updateRegistration],
+  ["DELETE", "/api/registrations/:id", deleteRegistration],
   ["GET", "/api/announcements", listAnnouncements],
   ["POST", "/api/announcements", createAnnouncement],
   ["DELETE", "/api/announcements/:id", deleteAnnouncement],
@@ -760,6 +795,7 @@ const routes = [
   ["PATCH", "/api/settings", settings],
   ["GET", "/api/database", database],
   ["GET", "/api/logs", logs],
+  ["POST", "/api/support", createSupport],
   ["GET", "/api/comments", comments],
   ["PATCH", "/api/comments/:id", comments],
   ["GET", "/api/notifications", notifications],

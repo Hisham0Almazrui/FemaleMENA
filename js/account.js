@@ -8,6 +8,7 @@
   const en = () => localStorage.getItem("mh-lang") === "en";
   const tx = (ar, english) => (en() ? english : ar);
   let me = null;
+  let flash = "";
 
   const NAV = [
     ["overview", "نظرة عامة", "Overview", "tournaments.view"],
@@ -63,12 +64,13 @@
     const items = NAV.filter((item) => has(item[3]))
       .map(([key, ar, english]) => `<a class="${id === key ? "on" : ""}" href="#${key}">${esc(tx(ar, english))}</a>`)
       .join("");
+    const note = flash ? `<p class="desk-flash">${esc(flash)}</p>` : "";
     return `<div class="rbac">
       <aside class="rbac-side">
         <div class="rbac-who">${badge(me.role)}<b>${esc(me.name)}</b><small>${esc(me.email)}</small></div>
         <nav>${items}</nav>
       </aside>
-      <section class="rbac-main">${body}</section>
+      <section class="rbac-main">${note}${body}</section>
     </div>`;
   }
 
@@ -676,8 +678,8 @@
         <td>${esc(match.team_a)} ${match.score_a ?? "–"} : ${match.score_b ?? "–"} ${esc(match.team_b)}</td>
         <td>${esc(match.status)}</td>
         ${
-          has("results.update")
-            ? `<td><button type="button" data-score="${match.id}" data-a="${match.score_a ?? 0}" data-b="${match.score_b ?? 0}">${tx("تحديث", "Update")}</button></td>`
+          has("results.update") || manage
+            ? `<td class="score-edit">${has("results.update") ? `<input data-score-a="${match.id}" type="number" min="0" value="${match.score_a ?? ""}" aria-label="${tx("نتيجة الأول", "Score A")}" /><input data-score-b="${match.id}" type="number" min="0" value="${match.score_b ?? ""}" aria-label="${tx("نتيجة الثاني", "Score B")}" /><button type="button" data-score="${match.id}">${tx("حفظ", "Save")}</button>` : ""}${manage ? `<button type="button" data-drop-match="${match.id}">${tx("حذف", "Delete")}</button>` : ""}</td>`
             : ""
         }
       </tr>`
@@ -701,7 +703,7 @@
     const data = await api("/api/teams");
     if (!data.ok) return denied();
     const manage = has("teams.manage");
-    const regs = manage ? await api("/api/registrations") : { registrations: [] };
+    const regs = await api("/api/registrations");
     const rows = (data.teams || [])
       .map(
         (team) => `<li><b>${esc(team.name)}</b><span>${esc(team.game)} · ${esc(team.status)}</span>
@@ -710,11 +712,12 @@
       .join("");
     const joins = (regs.registrations || [])
       .map(
-        (row) => `<li><b>${esc(row.team)}</b><span>${esc(row.tournament)} · ${esc(when(row.start_at))} · ${esc(row.status)}</span>
-        <button type="button" data-reg="${row.id}" data-status="approved">${tx("قبول", "Approve")}</button></li>`
+        (row) => `<li><b>${esc(row.team || row.tournament || "")}</b><span>${esc(row.tournament || "")} · ${esc(when(row.start_at))} · ${esc(row.status)}</span>
+        ${manage ? `<button type="button" data-reg="${row.id}" data-status="approved">${tx("قبول", "Approve")}</button><button type="button" data-reg="${row.id}" data-status="rejected">${tx("رفض", "Reject")}</button>` : `<button type="button" data-leave="${row.id}">${tx("انسحاب", "Leave")}</button>`}</li>`
       )
       .join("");
-    const form = !data.teams.length
+    const ownsTeam = (data.teams || []).some((team) => team.owner_id === me.id || team.owner === me.name);
+    const form = !ownsTeam
       ? `<form class="rbac-form" data-create-team>
           <input name="name" required placeholder="${tx("اسم الفريق", "Team name")}" />
           <select name="game"><option value="cod">Call of Duty</option><option value="valorant">Valorant</option></select>
@@ -723,7 +726,7 @@
       : "";
     return `<header class="rbac-head"><h1>${tx("الفرق", "Teams")}</h1></header>${form}
       <article class="rbac-block"><ul class="rbac-list">${rows || `<li>${tx("لا يوجد فريق.", "No team yet.")}</li>`}</ul></article>
-      ${manage ? `<article class="rbac-block"><h2>${tx("طلبات التسجيل", "Registrations")}</h2><ul class="rbac-list">${joins}</ul></article>` : ""}`;
+      <article class="rbac-block"><h2>${manage ? tx("طلبات التسجيل", "Registrations") : tx("تسجيلاتي", "My entries")}</h2><ul class="rbac-list">${joins || `<li>${tx("لا توجد تسجيلات.", "No entries.")}</li>`}</ul></article>`;
   }
 
   async function announcements() {
@@ -866,9 +869,17 @@
     root.querySelectorAll("button[data-decide]").forEach((button) => button.addEventListener("click", () => act(`/api/tournaments/${button.dataset.decide}/decision`, "POST", { decision: button.dataset.choice })));
     root.querySelectorAll("button[data-drop-cup]").forEach((button) => button.addEventListener("click", () => act(`/api/tournaments/${button.dataset.dropCup}`, "DELETE")));
     root.querySelectorAll("button[data-join]").forEach((button) => button.addEventListener("click", () => join(button.dataset.join)));
-    root.querySelectorAll("button[data-score]").forEach((button) => button.addEventListener("click", () => act(`/api/matches/${button.dataset.score}`, "PATCH", { scoreA: Number(button.dataset.a) + 1, scoreB: Number(button.dataset.b), status: "finished" })));
+    root.querySelectorAll("button[data-score]").forEach((button) => button.addEventListener("click", () => {
+      const a = root.querySelector(`[data-score-a="${button.dataset.score}"]`);
+      const b = root.querySelector(`[data-score-b="${button.dataset.score}"]`);
+      const scoreA = a && a.value !== "" ? Number(a.value) : null;
+      const scoreB = b && b.value !== "" ? Number(b.value) : null;
+      act(`/api/matches/${button.dataset.score}`, "PATCH", { scoreA, scoreB, status: scoreA == null || scoreB == null ? "scheduled" : "finished" });
+    }));
+    root.querySelectorAll("button[data-drop-match]").forEach((button) => button.addEventListener("click", () => act(`/api/matches/${button.dataset.dropMatch}`, "DELETE")));
     root.querySelectorAll("button[data-team]").forEach((button) => button.addEventListener("click", () => act(`/api/teams/${button.dataset.team}`, "PATCH", { status: button.dataset.status })));
     root.querySelectorAll("button[data-reg]").forEach((button) => button.addEventListener("click", () => act(`/api/registrations/${button.dataset.reg}`, "PATCH", { status: button.dataset.status })));
+    root.querySelectorAll("button[data-leave]").forEach((button) => button.addEventListener("click", () => act(`/api/registrations/${button.dataset.leave}`, "DELETE")));
     root.querySelectorAll("button[data-drop-news]").forEach((button) => button.addEventListener("click", () => act(`/api/announcements/${button.dataset.dropNews}`, "DELETE")));
     root.querySelectorAll("button[data-drop-sponsor]").forEach((button) => button.addEventListener("click", () => act(`/api/sponsors/${button.dataset.dropSponsor}`, "DELETE")));
     root.querySelectorAll("button[data-comment]").forEach((button) => button.addEventListener("click", () => act(`/api/comments/${button.dataset.comment}`, "PATCH", { status: button.dataset.status })));
@@ -889,21 +900,41 @@
       if (result.ok) {
         me.name = result.name;
         localStorage.setItem("mh-user", result.name);
-      }
+        flash = "";
+      } else flash = failure(result.error);
       draw();
     }
   }
 
   async function join(tournamentId) {
     const teams = await api("/api/teams");
-    const team = (teams.teams || []).find((item) => item.status === "approved");
-    if (!team) return draw();
+    const team = (teams.teams || []).find((item) => item.status === "approved" && (item.owner_id === me.id || item.owner === me.name));
+    if (!team) {
+      flash = tx("أنشئ فريقاً وانتظر الموافقة قبل التسجيل.", "Create a team and wait for approval before entering.");
+      draw();
+      return;
+    }
     await act("/api/registrations", "POST", { tournamentId: Number(tournamentId), teamId: team.id });
+  }
+
+  function failure(code) {
+    const copy = {
+      forbidden: ["لا تملك صلاحية هذا الإجراء.", "You are not allowed to do that."],
+      offline: ["تعذر حفظ هذا الإجراء.", "This action could not be saved."],
+      taken: ["هذا موجود مسبقاً.", "That already exists."],
+      weak: ["البيانات غير مكتملة.", "The details are incomplete."],
+      escalate: ["لا يمكن تغيير حساب أعلى من صلاحيتك.", "You cannot change an account above your rank."],
+      "last-owner": ["لا يمكن إيقاف المالك الأخير.", "The last owner cannot be suspended."],
+      "not-found": ["العنصر غير موجود.", "That item was not found."],
+    };
+    const line = copy[code] || ["تعذر تنفيذ الإجراء.", "The action could not be completed."];
+    return tx(line[0], line[1]);
   }
 
   async function act(path, method, body) {
     const result = await api(path, { method, body });
-    if (result.ok && window.MHWhen && path.indexOf("/api/tournaments") === 0) window.MHWhen.announce();
+    flash = result.ok ? "" : failure(result.error);
+    if (result.ok && window.MHWhen && (path.indexOf("/api/tournaments") === 0 || path.indexOf("/api/registrations") === 0)) window.MHWhen.announce();
     draw();
   }
 
@@ -932,6 +963,7 @@
 
   window.MHAccount = { mount };
   window.addEventListener("hashchange", () => {
+    flash = "";
     if (document.body.dataset.page === "account") draw();
   });
 })();

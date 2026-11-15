@@ -1081,6 +1081,9 @@ html[dir="rtl"] .cup-hero-shade {
 .rbac-list li, .rbac-table td { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
 .rbac-table table { width: 100%; border-collapse: collapse; }
 .rbac-table td small { display: block; color: #a7a7b0; }
+.desk-flash { margin: 0 0 12px; border-radius: 12px; padding: 10px 12px; color: #ffb4b4; background: rgba(214, 69, 69, 0.16); }
+.score-edit { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.score-edit input { width: 64px; border: 1px solid rgba(255,255,255,0.12); background: #16161a; color: #fff; border-radius: 10px; padding: 8px; }
 .rbac-main button, .rbac-list button, .rbac-table button {
   border: 1px solid rgba(255,255,255,0.1); background: #0c0c0d; color: #fff; border-radius: 999px; padding: 6px 10px;
 }
@@ -1130,7 +1133,9 @@ html[dir="rtl"] .cup-hero-shade {
 @media (max-width: 900px) {
   .hero, .cards, .prose, .t-grid, .tour-row, .tour-bento, .cup-layout, .cup-cols, .m-grid, .m-row, .foot-grid, .foot-bar, .admin-grid, .rbac, .wiz-grid, .wiz-grid.three { grid-template-columns: 1fr; }
   .rbac-side { position: static; }
-  .rbac-side nav { display: flex; overflow: auto; }
+  .rbac-side nav { display: flex; gap: 6px; overflow: auto; }
+  .rbac-side a { white-space: nowrap; }
+  .rbac-list li, .rbac-table td { flex-wrap: wrap; }
   .tour-bento { grid-template-rows: none; }
   .tour-bento .tour-card { grid-column: auto; grid-row: auto; }
   .foot-mail, .copy { justify-self: start; }
